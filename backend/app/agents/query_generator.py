@@ -18,17 +18,25 @@ Claim to verify: {claim}
 Instructions:
 1. Create queries that are specific, keyword-rich, and optimized for search engines
 2. Vary the query structure and focus to capture different aspects of the claim
-3. Include queries targeting:
-   - Official government sources and authoritative institutions
-   - Recent news articles from reputable sources
-   - Fact-checking organizations and debunking articles
-4. Use specific keywords from the claim, but also include related terms that might reveal verification or debunking information
-5. Make queries concise and search-engine friendly
-6. Ensure queries are diverse - don't just rephrase the same question
+3. CRITICAL: Generate queries that actively look for:
+   - DEBUNKING articles and fact-checks that disprove the claim
+   - OFFICIAL government/institutional sources that confirm or deny the claim
+   - Contradictory evidence and corrections
+   - Verification from authoritative sources (not just mentions)
+4. For each query, prioritize finding:
+   - Fact-checking sites (Snopes, FactCheck.org, Rappler, etc.) that verify this specific claim
+   - Official statements from relevant government agencies or institutions
+   - News articles that investigate and verify the claim (not just report it)
+5. Use specific keywords from the claim, but also include:
+   - Terms like "fact check", "debunk", "verify", "official", "confirmed"
+   - Related terms that might reveal if the claim is misinformation
+6. Make queries concise and search-engine friendly
+7. Ensure queries are diverse - one should focus on official sources, another on fact-checking/debunking
 
 AVOID:
    - Generic or broad queries that don't mention specific details from the claim
    - Queries that are too vague or abstract
+   - Queries that only search for mentions of the claim (we need verification, not just mentions)
 
 Output format: Return ONLY a valid Python list of strings, nothing else. Example format:
 ["query 1", "query 2"]
