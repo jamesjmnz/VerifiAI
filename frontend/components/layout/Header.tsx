@@ -1,5 +1,6 @@
 import React from 'react'
 import { Button } from '../ui/button'
+import Link from 'next/link'
 
 const Header = () => {
 
@@ -19,9 +20,11 @@ const navigations = [
             )}
         </div>
         <div>
+            <Link href={"/console"}>
             <Button>
                 Open Console
             </Button>
+            </Link>
         </div>
     </main>
     </nav>

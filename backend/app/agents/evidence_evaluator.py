@@ -37,7 +37,7 @@ SOURCES: {sources_text}
 
 Output format: Return ONLY a valid JSON object with the following structure, nothing else:
 {{
-  "verdict": "FAKE" or "LEGIT" or "UNCERTAIN",
+  "verdict": "FAKE" or "LEGIT",
   "analysis": "Detailed explanation with evidence and contradictions. Be specific about what sources say.",
   "sources": ["url1", "url2", "url3", "url4", "url5"]
 }}
