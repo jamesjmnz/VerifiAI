@@ -20,25 +20,43 @@ def evidence_evaluator_node(state: VerificationState) -> VerificationState:
     print(f"SOURCES:\n\n {sources_text}")
 
 
-    prompt = f"""You are a professional fact-checker. Analyze this claim with EXTREME SKEPTICISM.
+    prompt = f"""You are a professional fact-checker. Analyze this claim with EXTREME SKEPTICISM and RIGOR.
 
 CLAIM: {claim}
 TODAY (UTC): {current_date}
 
-INSTRUCTIONS:
-1. Be HIGHLY SKEPTICAL - articles mentioning ≠ claim is true
-2. Look for CONTRADICTORY EVIDENCE and DEBUNKING
-3. PRIORITIZE fact-checking sites and OFFICIAL sources
-4. Distinguish REPORTING the claim vs PROVING it
-5. TIMELINESS: If sources are outdated or predate the claim. Prefer the most recent credible sources.
+CRITICAL EVALUATION RULES:
+1. DEFAULT TO SKEPTICISM: If evidence is unclear, contradictory, or insufficient, mark as FAKE
+2. MENTION ≠ VERIFICATION: Articles that merely mention or report a claim do NOT prove it's true
+3. REQUIRE POSITIVE PROOF: For LEGIT verdict, you MUST find clear, authoritative evidence that directly confirms the claim
+4. CHECK FOR CONTRADICTIONS: If official sources contradict the claim, it's FAKE
+5. VERIFY AGAINST KNOWN FACTS: If the claim contradicts established facts (e.g., "K-13" when the actual program is "K-12"), it's FAKE
+6. SOURCE HIERARCHY (in order of credibility):
+   - Official government/institutional statements and documents
+   - Established fact-checking organizations (Snopes, FactCheck.org, Rappler, etc.)
+   - Reputable news outlets with investigative reporting
+   - Social media, blogs, and unverified sources are LOW credibility
+7. LOOK FOR RED FLAGS:
+   - Claims that contradict official records or established facts
+   - Numbers, dates, or names that don't match official information
+   - Claims that seem too good to be true or sensational
+   - Lack of official confirmation despite being a significant claim
+8. DISTINGUISH REPORTING vs PROVING:
+   - "News article reports X" ≠ X is true
+   - "Official source confirms X" = X is likely true
+   - "Fact-checker debunks X" = X is false
+9. TIMELINESS: Prefer recent, credible sources. Outdated sources may not reflect current reality.
 
+VERDICT GUIDELINES:
+- "FAKE": Claim is false, debunked, contradicts official sources, or contains factual errors
+- "LEGIT": Claim is confirmed by authoritative sources with clear evidence
 
 SOURCES: {sources_text}
 
 Output format: Return ONLY a valid JSON object with the following structure, nothing else:
 {{
-  "verdict": "FAKE" or "LEGIT",
-  "analysis": "Detailed explanation with evidence and contradictions. Be specific about what sources say.",
+  "verdict": "FAKE" or "LEGIT"
+  "analysis": "Detailed explanation with evidence and contradictions. Be specific about what sources say. If marking as LEGIT, explain what evidence confirms it. If marking as FAKE, explain what contradicts it or why it's false.",
   "sources": ["url1", "url2", "url3", "url4", "url5"]
 }}
 
@@ -56,7 +74,7 @@ Generate the analysis now:"""
         
         # Extract and validate fields
         verdict = parsed.get("verdict", "").upper()
-        if verdict not in ["FAKE", "LEGIT", "UNCERTAIN"]:
+        if verdict not in ["FAKE", "LEGIT"]:
             raise ValueError(f"Invalid verdict: {verdict}")
         
         analysis = parsed.get("analysis", "")

@@ -8,12 +8,30 @@ import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft, Search, SparkleIcon, Sparkles, Terminal } from 'lucide-react'
 import Link from 'next/link'
 import React, { useState } from 'react'
+import { verifyClaim } from '@/lib/verify'
+import { VerificationResult } from '../types/verify'
 
 const Console = () => {
 
     const [claim, setClaim] = useState<string>("")
     const [open, setOpen] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(false)
+    const [result, setResult] = useState<VerificationResult | null>(null)
 
+
+    async function handleFactCheck() {
+        setOpen(true)
+        setLoading(true)
+
+        try {
+            const data = await verifyClaim(claim)
+            setResult(data) 
+        } catch(err) {
+            console.error(err)
+        } finally {
+            setLoading(false)
+        }
+    }
 
   return (
     <main>
@@ -43,7 +61,7 @@ const Console = () => {
                        <span><Search />  </span>
                       Analyze Content
                     </Button>
-                    <Button onClick={() => setOpen(true)} disabled={claim.length < 1} variant={"outline"} className='py-5 flex gap-2'>
+                    <Button onClick={handleFactCheck} disabled={claim.length < 1} variant={"outline"} className='py-5 flex gap-2'>
                        <span><Sparkles />  </span>
                        Quick Fact Check 
                     </Button>
@@ -53,7 +71,7 @@ const Console = () => {
             
         </div>
 
-        <Modal open={open} />
+        <Modal claim={claim} open={open} loading={loading} result={result} />
     </main>
   )
 }

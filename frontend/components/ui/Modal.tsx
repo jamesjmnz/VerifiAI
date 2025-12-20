@@ -3,11 +3,15 @@ import React from 'react'
 import { DialogHeader } from './dialog'
 import { Button } from './button'
 import Link from 'next/link'
-import { Brain, Link2, Link2Icon, Link2Off, LinkIcon, LucideLink, Share, X } from 'lucide-react'
+import { Brain, Check, Link2, Link2Icon, Link2Off, LinkIcon, LucideLink, Share, X } from 'lucide-react'
+import { VerificationResult } from '@/app/types/verify'
 
 
 type Props = {
+  claim: string
   open: boolean
+  loading: boolean,
+  result: VerificationResult | null
 }
 
 const mockSources = [
@@ -25,21 +29,25 @@ const mockSources = [
   }
 ]
 
-const Modal = ({open}: Props) => {
+const Modal = ({claim, open, loading, result}: Props) => {
 
   if (!open) return null
 
   return (
    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60'>
       <div  className="w-full max-w-2xl rounded-lg bg-white p-6">
-        <div className='flex justify-between items-center pb-5'>
+        {loading && <p>Analyzing Claim</p>}
+
+        {!loading && result && (
+          <>
+            <div className='flex justify-between items-center pb-5'>
           <h1 className='text-2xl font-bold'>Fact Check Result</h1>
-          <Button className='rounded-full' variant={"destructive"}><span><X /></span>Fake News</Button>
+          <Button className={`rounded-full ${result.verdict == "FAKE" ? "bg-red-500" : "bg-green-500"} text-white`} ><span>{result.verdict == "FAKE" ? <X /> : <Check /> }</span>{result.verdict}</Button>
         </div>
         <div className='flex flex-col gap-2.5 pb-5'>
           <h1 className='text-base font-semibold flex items-center gap-2'><span><Brain className='text-blue-500' size={18}/></span>AI Analysis</h1>
           <div className='outline rounded-lg px-4 py-6 text-muted-foreground text-sm bg-gray-10'>
-            <p>Our AI analysis detected several inconsistencies in this claim. The primary source cited does not exist, and the quoted statistics contradict official data from verified government agencies. Additionally, the article uses sensationalist language patterns commonly associated with misinformation campaigns. Cross-referencing with trusted databases revealed no supporting evidence for the central claim.</p>
+          <p>{result.analysis}</p>
           </div>
         </div>
         <div className='flex flex-col gap-3'>
@@ -59,6 +67,8 @@ const Modal = ({open}: Props) => {
           </Link>
           ))}
         </div>
+          </>
+        )}
       </div>
    </div>
   )

@@ -9,7 +9,6 @@ from pydantic import BaseModel
 class VerdictEnum(str, Enum):
     FAKE = "FAKE"
     LEGIT = "LEGIT"
-    UNCERTAIN = "UNCERTAIN"
 
 class VerificationRequest(BaseModel):
     claim: str
