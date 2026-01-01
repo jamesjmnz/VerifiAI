@@ -26,6 +26,7 @@ const Console = () => {
         try {
             const data = await verifyClaim(claim)
             setResult(data) 
+            console.log(result?.sources)
         } catch(err) {
             console.error(err)
         } finally {
@@ -71,7 +72,7 @@ const Console = () => {
             
         </div>
 
-        <Modal claim={claim} open={open} loading={loading} result={result} />
+        <Modal claim={claim} open={open} loading={loading} result={result} onClose={() => setOpen(false)} />
     </main>
   )
 }
