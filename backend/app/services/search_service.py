@@ -7,7 +7,7 @@ load_dotenv()
 
 class SearchService:
     def __init__(self):
-        self.search_tool = TavilySearch(max_results = 2, search_depth="advanced", include_answe="basic")
+        self.search_tool = TavilySearch(max_results = 2, search_depth="basic", include_answer="basic")
 
 
     def batch_search(self, queries: List[str]) -> List[Dict]:

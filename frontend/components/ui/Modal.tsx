@@ -12,6 +12,7 @@ type Props = {
   open: boolean
   loading: boolean,
   result: VerificationResult | null
+  onClose: () => void
 }
 
 const mockSources = [
@@ -29,7 +30,7 @@ const mockSources = [
   }
 ]
 
-const Modal = ({claim, open, loading, result}: Props) => {
+const Modal = ({claim, open, loading, result, onClose}: Props) => {
 
   if (!open) return null
 
@@ -50,7 +51,7 @@ const Modal = ({claim, open, loading, result}: Props) => {
           <p>{result.analysis}</p>
           </div>
         </div>
-        <div className='flex flex-col gap-3'>
+        <div className='flex flex-col pb-10 gap-3'>
           <h1 className='text-base flex items-center gap-2 font-semibold'><span className='text-blue-500'><Link2 /></span>Trusted Sources Used</h1>
           {mockSources.map((source) => (
             <Link href="/">
@@ -65,8 +66,15 @@ const Modal = ({claim, open, loading, result}: Props) => {
               </div>
           </div>
           </Link>
+
           ))}
         </div>
+        <div className='justify-end flex w-full'>
+        <Button onClick={onClose}  variant={'outline'}>
+            Close
+          </Button>
+        </div>
+         
           </>
         )}
       </div>

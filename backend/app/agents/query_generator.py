@@ -11,32 +11,30 @@ def query_generator_node(state: VerificationState) -> VerificationState:
     claim = state["claim"]
     
 
-    prompt = f"""You are a fact-checking assistant. Generate 2 diverse and effective search queries to verify the following claim.
+    prompt = f"""You are a fact-checking assistant. Generate 2 search queries to verify the following claim.
 
 Claim to verify: {claim}
 
+CRITICAL REQUIREMENTS:
+1. STAY CLOSE TO THE CLAIM: Use the exact key details, names, dates, numbers, and specific facts from the claim. Do not generalize or abstract away from the claim.
+2. PRESERVE SPECIFIC DETAILS: Include all important specifics from the claim (who, what, when, where, how much, etc.)
+3. Keep the core claim intact - only add fact-checking terms, don't change or remove the claim's essential details
+
 Instructions:
-1. Create queries that are specific, keyword-rich, and optimized for search engines
-2. Vary the query structure and focus to capture different aspects of the claim
-3. CRITICAL: Generate queries that actively look for:
-   - DEBUNKING articles and fact-checks that disprove the claim
-   - OFFICIAL government/institutional sources that confirm or deny the claim
-   - Contradictory evidence and corrections
-   - Verification from authoritative sources (not just mentions)
-4. For each query, prioritize finding:
-   - Fact-checking sites (Snopes, FactCheck.org, Rappler, etc.) that verify this specific claim
-   - Official statements from relevant government agencies or institutions
-   - News articles that investigate and verify the claim (not just report it)
-5. Use specific keywords from the claim, but also include:
-   - Terms like "fact check", "debunk", "verify", "official", "confirmed"
-   - Related terms that might reveal if the claim is misinformation
-6. Make queries concise and search-engine friendly
-7. Ensure queries are diverse - one should focus on official sources, another on fact-checking/debunking
+1. Extract the key factual elements from the claim (names, places, dates, numbers, events, etc.)
+2. Create 2 queries that:
+   - Query 1: Include the claim's key details + "fact check" or "verify"
+   - Query 2: Include the claim's key details + "debunk" or "official statement" or relevant authority name
+3. Use the exact wording and specifics from the claim - don't paraphrase or generalize
+4. Keep queries concise (under 15 words each)
+5. Only add minimal fact-checking terms - the claim details should dominate the query
 
 AVOID:
-   - Generic or broad queries that don't mention specific details from the claim
-   - Queries that are too vague or abstract
-   - Queries that only search for mentions of the claim (we need verification, not just mentions)
+   - Changing or removing specific details from the claim
+   - Generalizing the claim (e.g., if claim mentions "President X on date Y", don't make it "president statement")
+   - Adding unrelated terms or concepts not in the claim
+   - Making queries too abstract or vague
+   - Straying from the claim's core message
 
 Output format: Return ONLY a valid Python list of strings, nothing else. Example format:
 ["query 1", "query 2"]

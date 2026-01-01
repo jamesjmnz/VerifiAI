@@ -26,7 +26,9 @@ CLAIM: {claim}
 TODAY (UTC): {current_date}
 
 CRITICAL EVALUATION RULES:
-1. DEFAULT TO SKEPTICISM: If evidence is unclear, contradictory, or insufficient, mark as FAKE
+1. APPLY PROPORTIONAL SKEPTICISM:
+   - For allegations or controversial claims, require strong proof.
+   - For quotes or benign events, reputable primary reporting may be sufficient.
 2. MENTION ≠ VERIFICATION: Articles that merely mention or report a claim do NOT prove it's true
 3. REQUIRE POSITIVE PROOF: For LEGIT verdict, you MUST find clear, authoritative evidence that directly confirms the claim
 4. CHECK FOR CONTRADICTIONS: If official sources contradict the claim, it's FAKE
@@ -60,7 +62,12 @@ Output format: Return ONLY a valid JSON object with the following structure, not
   "sources": ["url1", "url2", "url3", "url4", "url5"]
 }}
 
-CRITICAL: The "sources" array is REQUIRED and must contain 3-5 URLs from the provided sources that are most relevant and credible for verifying this claim. Only include URLs that were actually provided in the SOURCES section above. DO NOT return an empty sources array. If sources were provided above, you MUST include their URLs in the response.
+SOURCES REQUIREMENT:
+- Include ONLY sources that DIRECTLY support or contradict the claim.
+- The sources array MUST NOT include irrelevant or weakly related links.
+- The number of sources may range from 0 to 5 depending on relevance.
+- One highly authoritative source is sufficient if it directly verifies the claim.
+- If no sources directly verify or contradict the claim, return an empty array.
 
 Generate the analysis now:"""
 
