@@ -29,9 +29,24 @@ model Claim {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+  result ClaimResult?
 
 }
 
-model Result {
+enum Verdict {
+  FAKE
+  LEGIT
+  UNCERTAIN
+}
+
+model ClaimResult {
   id Int @id @default(autoincrement())
+  claimId Int @unique
+  verdict Verdict
+  analysis String
+  confidence Int
+  createdAt DateTime @default(now())
+
+  claim Claim @relation(fields: [claimId], references:  [id])
+  
 }
