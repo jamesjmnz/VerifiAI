@@ -13,63 +13,44 @@ def evidence_evaluator_node(state: VerificationState) -> VerificationState:
     results = state["search_results"]
     current_date = datetime.now().date().isoformat()
 
-    sources_text = "\n\n".join([f"Source {i + 1}\nTitle:{r.get("title", "")}\nContent:{r.get("content", "")}\nURL:{r.get("url")}"for i, r in enumerate(results, 1)])
-
+    # Optimize sources text construction
+    sources_parts = []
+    for i, r in enumerate(results, 1):
+        title = r.get("title", "")
+        content = r.get("content", "")
+        url = r.get("url", "")
+        sources_parts.append(f"Source {i}\nTitle: {title}\nContent: {content}\nURL: {url}")
+    sources_text = "\n\n".join(sources_parts)
 
     print("==========" * 2)
     print(f"SOURCES:\n\n {sources_text}")
 
-
-    prompt = f"""You are a professional fact-checker. Analyze this claim with EXTREME SKEPTICISM and RIGOR.
+    # Concise prompt for faster processing
+    prompt = f"""Fact-check this claim with extreme skepticism.
 
 CLAIM: {claim}
-TODAY (UTC): {current_date}
+DATE: {current_date}
 
-CRITICAL EVALUATION RULES:
-1. APPLY PROPORTIONAL SKEPTICISM:
-   - For allegations or controversial claims, require strong proof.
-   - For quotes or benign events, reputable primary reporting may be sufficient.
-2. MENTION ≠ VERIFICATION: Articles that merely mention or report a claim do NOT prove it's true
-3. REQUIRE POSITIVE PROOF: For LEGIT verdict, you MUST find clear, authoritative evidence that directly confirms the claim
-4. CHECK FOR CONTRADICTIONS: If official sources contradict the claim, it's FAKE
-5. VERIFY AGAINST KNOWN FACTS: If the claim contradicts established facts (e.g., "K-13" when the actual program is "K-12"), it's FAKE
-6. SOURCE HIERARCHY (in order of credibility):
-   - Official government/institutional statements and documents
-   - Established fact-checking organizations (Snopes, FactCheck.org, Rappler, etc.)
-   - Reputable news outlets with investigative reporting
-   - Social media, blogs, and unverified sources are LOW credibility
-7. LOOK FOR RED FLAGS:
-   - Claims that contradict official records or established facts
-   - Numbers, dates, or names that don't match official information
-   - Claims that seem too good to be true or sensational
-   - Lack of official confirmation despite being a significant claim
-8. DISTINGUISH REPORTING vs PROVING:
-   - "News article reports X" ≠ X is true
-   - "Official source confirms X" = X is likely true
-   - "Fact-checker debunks X" = X is false
-9. TIMELINESS: Prefer recent, credible sources. Outdated sources may not reflect current reality.
+RULES:
+1. Require strong proof for controversial claims; primary reporting OK for benign events
+2. Articles mentioning a claim ≠ proof it's true
+3. LEGIT requires clear authoritative evidence directly confirming the claim
+4. FAKE if: contradicts official sources, debunked, or contains factual errors
+5. Source hierarchy: Official statements > Fact-checkers (Snopes, FactCheck.org) > Reputable news > Social media/blogs
+6. "News reports X" ≠ X is true; "Official confirms X" = likely true; "Fact-checker debunks X" = false
+7. Prefer recent credible sources
 
-VERDICT GUIDELINES:
-- "FAKE": Claim is false, debunked, contradicts official sources, or contains factual errors
-- "LEGIT": Claim is confirmed by authoritative sources with clear evidence
+SOURCES:
+{sources_text}
 
-SOURCES: {sources_text}
-
-Output format: Return ONLY a valid JSON object with the following structure, nothing else:
+Return ONLY valid JSON:
 {{
-  "verdict": "FAKE" or "LEGIT"
-  "analysis": "Detailed explanation with evidence and contradictions. Be specific about what sources say. If marking as LEGIT, explain what evidence confirms it. If marking as FAKE, explain what contradicts it or why it's false.",
-  "sources": ["url1", "url2", "url3", "url4", "url5"]
+  "verdict": "FAKE" or "LEGIT",
+  "analysis": "Detailed explanation with specific evidence. If LEGIT, explain what confirms it. If FAKE, explain contradictions or why false.",
+  "sources": ["url1", "url2", ...]
 }}
 
-SOURCES REQUIREMENT:
-- Include ONLY sources that DIRECTLY support or contradict the claim.
-- The sources array MUST NOT include irrelevant or weakly related links.
-- The number of sources may range from 0 to 5 depending on relevance.
-- One highly authoritative source is sufficient if it directly verifies the claim.
-- If no sources directly verify or contradict the claim, return an empty array.
-
-Generate the analysis now:"""
+Sources: Include ONLY URLs that directly support/contradict the claim (0-5 URLs). One authoritative source is sufficient. Empty array if none directly relevant."""
 
     llm_start = time.time()
     response = llm_service.invoke(prompt)

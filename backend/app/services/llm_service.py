@@ -14,10 +14,19 @@ class LLMService:
             )
 
        
-        self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.1, api_key=api_key)
+        self.llm = ChatOpenAI(
+            model="gpt-4o-mini", 
+            temperature=0.1, 
+            api_key=api_key,
+            max_tokens=1000  # Limit response length for faster generation
+        )
 
     def invoke(self, prompt: str) -> str:
         response = self.llm.invoke(prompt)
+        return response.content
+    
+    async def ainvoke(self, prompt: str) -> str:
+        response = await self.llm.ainvoke(prompt)
         return response.content
 
 
