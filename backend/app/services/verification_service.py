@@ -30,12 +30,11 @@ class VerificationService:
 
         return VerificationResponse(
             claim=claim,
-            analysis = final_state["analysis"],
-            verdict = VerdictEnum(final_state["verdict"]),
-            sources = final_state["sources"],
-            potential_fake_score = final_state["potential_fake_score"],
-            score_breakdown = final_state["score_breakdown"]
-
+            analysis=final_state["analysis"],
+            verdict=VerdictEnum(final_state["verdict"]),
+            sources=final_state["sources"],
+            potential_fake_score=final_state.get("potential_fake_score"),
+            score_breakdown=final_state.get("score_breakdown")
         )
 
 verification_service = VerificationService()
