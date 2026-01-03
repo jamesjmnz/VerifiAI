@@ -1,67 +1,195 @@
 # VerifiAI - AI-Powered Fact-Checking Platform
 
-VerifiAI is an intelligent fact-checking system that uses advanced machine learning and agent-based workflows to verify claims by searching for evidence, evaluating credibility, and generating comprehensive verification reports. The platform consists of a FastAPI backend and a Next.js frontend, providing a seamless experience for detecting misinformation.
+> **System Description:** VerifiAI is a **multi-agent agentic AI system** with intelligent evidence gathering and multi-signal credibility scoring for automated fact-checking and fake news detection.
 
-## 🎯 Features
+This directory houses the documentation for **VerifiAI**, a **hierarchical multi-agent agentic AI system** with intelligent search orchestration and ensemble credibility scoring for context-aware fact verification.
 
-- **Intelligent Query Generation**: Automatically generates diverse, optimized search queries to find relevant evidence
-- **Multi-Source Evidence Gathering**: Aggregates information from official sources, fact-checking organizations, and reputable news outlets
-- **Multi-Agent Risk Scoring**: Combines multiple ML models and heuristics for comprehensive risk assessment:
-  - **Fake News Detection Model**: BERT-based model for detecting fake news patterns (0-25 risk score)
-  - **Domain Trust Analysis**: Evaluates source credibility based on domain reputation (0-30 risk score)
-  - **Semantic Cross-Reference**: Measures semantic similarity between claim and evidence using sentence transformers (0-25 risk score)
-- **Rigorous Evidence Evaluation**: Uses extreme skepticism and rigorous analysis to distinguish between verified facts and misinformation
-- **Comprehensive Verification Reports**: Provides detailed analysis with supporting sources and clear verdicts (FAKE, LEGIT, or UNCERTAIN)
-- **Vector Database Integration**: Qdrant vector store for caching and semantic search of previous verifications
-- **Optimized Performance**: LLM response time for fake news verification improved from averaging 16 seconds to 7 seconds
-- **Modern Web Interface**: Clean, responsive UI built with Next.js and Tailwind CSS
-- **RESTful API**: Well-structured API endpoints for integration with extensions or other applications
+## System Classification
 
-## 🏗️ Architecture
+| Aspect | Classification |
+|--------|----------------|
+| **Architecture** | Hierarchical Multi-Agent System with Conditional Scoring |
+| **AI Pattern** | Agentic AI (ReAct reasoning, tool use, autonomous planning) |
+| **Orchestration** | Directed Acyclic Graph (DAG) - LangGraph 5-node pipeline |
+| **Learning** | Vector Database Caching (Qdrant for semantic search) |
+| **Credibility** | 4-Signal Weighted Ensemble (Domain Trust + Semantic Cross-Reference + Google Fact Check + Fake News Model) |
+| **Verdict System** | Three-Tier (FAKE, LEGIT, UNCERTAIN) with Conditional Risk Scoring |
 
-VerifiAI uses an agent-based workflow architecture powered by LangGraph:
+> **Context Engineering**: The entire 5-node architecture is a form of context engineering - we design the pipeline structure, agent specializations, search query generation, and credibility signals to inject domain-specific knowledge into the system. Rather than relying on a single LLM prompt, we engineer the context at every node to ensure rigorous fact-checking with extreme skepticism.
 
-1. **Query Generator**: Analyzes the claim and generates optimized search queries targeting official sources and fact-checking sites
-2. **Search Executor**: Executes searches across multiple sources and collects relevant evidence
-3. **Evidence Evaluator**: Applies rigorous skepticism to evaluate evidence credibility and determine verdict using:
-   - LLM-powered reasoning
-   - Multi-agent risk scoring system
-   - Source credibility analysis
-4. **Report Generator**: Synthesizes findings into a comprehensive verification report
+## Agent Summary (5 Core Nodes + 4 Scoring Agents)
 
-## 🛠️ Tech Stack
+| Category | Count | Agents/Nodes |
+|----------|-------|--------------|
+| **Core Pipeline Nodes** | 5 | QueryGenerator, SearchExecutor, EvidenceEvaluator, ScoringNode, ReportGenerator |
+| **Scoring Agents** | 4 | DomainTrustAgent, SemanticCrossrefAgent, GoogleFactCheckAgent, FakeNewsModelAgent |
+
+> **Note**: Scoring agents run in parallel only when verdict is UNCERTAIN. If EvidenceEvaluator determines FAKE or LEGIT, scoring is skipped.
+
+## Novel Contributions
+
+1. **Context-Engineered Multi-Agent Architecture** – The 5-node pipeline is itself context engineering: each node, agent specialization, search query strategy, and credibility signal injects domain knowledge into the system.
+2. **Conditional Multi-Signal Risk Scoring** – 4 independent scoring agents run in parallel only when evidence is insufficient (UNCERTAIN verdict), providing nuanced risk assessment (0-100 score).
+3. **Three-Tier Verdict System with Extreme Skepticism** – FAKE (positive evidence of falsehood), LEGIT (clear authoritative confirmation), UNCERTAIN (default when evidence is insufficient).
+4. **4-Signal Credibility Framework** – Domain Trust (30%) + Semantic Cross-Reference (25%) + Google Fact Check (20%) + Fake News Model (25%).
+5. **Intelligent Query Generation** – LLM-powered query generation that preserves claim specifics while adding fact-checking context.
+6. **Parallel Evidence Gathering** – Batch search execution with parallel query processing for faster evidence collection.
+
+## Contents
+- `README.md` (this file) – System overview, architecture, and quick start guide
+- `backend/app/agents/` – All agent implementations
+- `backend/app/workflows/` – LangGraph workflow definition
+- `backend/app/services/` – Core services (LLM, Search, Verification)
+
+## Application Overview
+
+### Frontend (Next.js 16 + React 19)
+- **Verification Console** – Dashboard for submitting claims and viewing verification results
+- **Real-time Verification** – Stream verification process with detailed analysis
+- **Score Breakdown Visualization** – Display risk scores and credibility breakdowns
+
+### Backend (FastAPI + LangGraph)
+5-Node Multi-Agent Pipeline:
+
+| Node | Agent/Node | Function |
+|------|------------|----------|
+| 1 | **QueryGenerator** | LLM-powered query generation (2 queries per claim) |
+| 2 | **SearchExecutor** | Parallel batch search via Tavily API |
+| 3 | **EvidenceEvaluator** | LLM-powered evidence analysis with extreme skepticism → verdict (FAKE/LEGIT/UNCERTAIN) |
+| 4 | **ScoringNode** (Conditional) | Parallel execution of 4 scoring agents (only if UNCERTAIN) |
+| 5 | **ReportGenerator** | Final report synthesis |
+
+## Architecture Highlights
+
+### 1. QueryGenerator Node
+Located in `backend/app/agents/query_generator.py`:
+- **LLM-Powered**: Uses GPT-4o-mini for intelligent query generation
+- **Claim Preservation**: Maintains exact claim details while adding fact-checking context
+- **Dual Query Strategy**: Generates 2 queries - one with "fact check/verify" terms, one with "debunk/official statement" terms
+- **Context-Aware**: Preserves names, dates, numbers, and specific facts from the claim
+
+### 2. SearchExecutor Node
+Located in `backend/app/agents/search_executor.py`:
+- **Tavily Integration**: Web search with semantic reranking
+- **Parallel Execution**: Batch search with `asyncio.gather` for concurrent queries
+- **Result Aggregation**: Flattens and merges results from multiple queries
+
+### 3. EvidenceEvaluator Node
+Located in `backend/app/agents/evidence_evaluator.py`:
+- **Extreme Skepticism**: Rigorous evaluation rules with source hierarchy
+- **LLM Reasoning**: GPT-4o-mini with carefully engineered prompts
+- **Three-Tier Verdict**: FAKE (positive evidence of falsehood), LEGIT (clear confirmation), UNCERTAIN (default)
+- **Source Validation**: Distinguishes between mentions and actual verification
+- **Critical Rule**: Absence of evidence ≠ evidence of falsehood
+
+### 4. ScoringNode (Conditional Execution)
+Located in `backend/app/agents/scoring_node.py`:
+- **Conditional Logic**: Runs ONLY when verdict == "UNCERTAIN"
+- **Parallel Execution**: All 4 scoring agents run concurrently via `asyncio.gather`
+- **Error Handling**: Comprehensive try-except with default fallback values
+- **Score Aggregation**: Combines 4 signals into 0-100 risk score
+
+#### 4.1 DomainTrustAgent
+Located in `backend/app/agents/domain_trust_agent.py`:
+- **Tiered Scoring**: Government (0.95) > Fact-checkers (0.90) > News (0.75-0.82) > Social Media (0.40-0.50)
+- **Risk Calculation**: (1 - confidence) × 30
+- **Domain Matching**: Exact match + suffix matching for subdomains
+- **Max Contribution**: 30 points
+
+#### 4.2 SemanticCrossrefAgent
+Located in `backend/app/agents/semantic_crossref_agent.py`:
+- **Embedding Model**: BAAI/bge-m3 (SentenceTransformer)
+- **Cosine Similarity**: Measures semantic agreement between claim and evidence
+- **Risk Thresholds**: 
+  - ≥0.85 similarity → 2 points (strong agreement)
+  - ≥0.72 → 6 points (good agreement)
+  - ≥0.60 → 12 points (weak agreement)
+  - <0.60 → 18 points (no agreement)
+- **Max Contribution**: 25 points
+
+#### 4.3 GoogleFactCheckAgent
+Located in `backend/app/agents/google_factcheck_agent.py`:
+- **Google Fact Check API**: Human fact-checker verdicts
+- **Rating Mapping**: Maps textual ratings (true, mostly true, false, etc.) to confidence scores
+- **Risk Calculation**: (1 - confidence) × 20
+- **Default Handling**: Returns 10 (50% confidence) if no API key or no results
+- **Max Contribution**: 20 points
+
+#### 4.4 FakeNewsModelAgent
+Located in `backend/app/agents/fake_news_model_agent.py`:
+- **BERT Model**: `jy46604790/Fake-News-Bert-Detect` (HuggingFace)
+- **Sequence Classification**: Binary classification (FAKE vs REAL)
+- **Risk Calculation**: fake_probability × 25
+- **Max Contribution**: 25 points
+
+### 5. ReportGenerator Node
+Located in `backend/app/agents/report_generator.py`:
+- **Final Synthesis**: Prepares verification report (currently pass-through)
+- **Future Enhancement**: Will generate comprehensive narrative reports
+
+## Workflow Flow
+
+```
+Claim Input
+    ↓
+[1] QueryGenerator → Generates 2 search queries
+    ↓
+[2] SearchExecutor → Parallel batch search (Tavily)
+    ↓
+[3] EvidenceEvaluator → LLM analysis → Verdict (FAKE/LEGIT/UNCERTAIN)
+    ↓
+    ├─→ If UNCERTAIN → [4] ScoringNode (4 agents in parallel) → [5] ReportGenerator
+    └─→ If FAKE/LEGIT → [5] ReportGenerator
+    ↓
+Final Response (with optional risk scores)
+```
+
+## Latest Updates
+
+### Multi-Agent Risk Scoring System
+- **4 Independent Scorers**: Domain Trust, Semantic Cross-Reference, Google Fact Check, Fake News Model
+- **Parallel Execution**: All scorers run concurrently for optimal performance
+- **Error Resilience**: Comprehensive error handling with fallback defaults
+- **Score Validation**: Input validation and range clamping (0-100)
+
+### Conditional Scoring Architecture
+- **Smart Routing**: Scoring only runs when evidence is insufficient (UNCERTAIN)
+- **Performance Optimization**: Skips expensive scoring when verdict is clear
+- **Risk Score Breakdown**: Detailed per-agent contribution tracking
+
+### Enhanced Error Handling
+- **Robust Validation**: All scores validated and normalized before aggregation
+- **Exception Handling**: Individual scorer failures don't crash the system
+- **Default Values**: Sensible fallbacks for missing or invalid scores
+
+## Tech Stack
 
 ### Backend
-- **FastAPI**: Modern, fast web framework for building APIs
-- **Python 3.13+**: Core programming language
-- **LangGraph**: Agent workflow orchestration
-- **LLM Integration**: AI-powered reasoning and analysis (OpenAI/Anthropic)
-- **Transformers**: Hugging Face transformers for ML models
-  - BERT-based fake news detection model (`jy46604790/Fake-News-Bert-Detect`)
+- **Python 3.13+** with virtual environment
+- **FastAPI** – Async web framework
+- **LangGraph** – Multi-agent workflow orchestration
+- **OpenAI GPT-4o-mini** – LLM for reasoning and query generation
+- **Tavily Search API** – Web search with semantic reranking
+- **Google Fact Check API** – Human fact-checker verification
+- **HuggingFace Transformers** – ML models
+  - BERT-based fake news detection (`jy46604790/Fake-News-Bert-Detect`)
   - Sentence transformers for semantic similarity (`BAAI/bge-m3`)
-- **PyTorch**: Deep learning framework for model inference
-- **Qdrant**: Vector database for semantic search and caching
-- **Search Service**: Integration with search providers for evidence gathering
+- **PyTorch** – Deep learning framework
+- **Qdrant** – Vector database for semantic search and caching (optional)
+- **httpx** – Async HTTP client
 
 ### Frontend
-- **Next.js 16**: React framework with App Router
-- **TypeScript**: Type-safe development
-- **Tailwind CSS**: Utility-first CSS framework
-- **Radix UI**: Accessible component primitives
-- **Lucide React**: Icon library
-- **Prisma**: Database ORM with Neon adapter
+- **Next.js 16** with **React 19** and **TypeScript**
+- **Tailwind CSS** – Utility-first styling
+- **Radix UI** – Accessible component primitives
+- **Lucide React** – Icon library
+- **Prisma** – Database ORM with Neon adapter
 
-## 📋 Prerequisites
+### DevOps
+- **Docker** – Containerization (Qdrant)
+- **Docker Compose** – Local development setup
 
-- Python 3.13 or higher
-- Node.js 18+ and npm/yarn/pnpm
-- Docker and Docker Compose (for Qdrant vector database)
-- API keys for:
-  - LLM provider (e.g., OpenAI, Anthropic)
-  - Search service provider
-  - OpenAI (for embeddings in vector store)
-
-## 🚀 Quick Start
+## Getting Started
 
 ### Prerequisites Setup
 
@@ -86,26 +214,23 @@ VerifiAI uses an agent-based workflow architecture powered by LangGraph:
 
 3. **Install dependencies:**
    ```bash
-   pip install fastapi uvicorn langgraph langchain-openai langchain-qdrant qdrant-client transformers torch sentence-transformers
+   pip install fastapi uvicorn langgraph langchain-openai langchain-tavily qdrant-client transformers torch sentence-transformers httpx python-dotenv
    ```
-   Note: If you don't have a `requirements.txt`, install the packages above. For production, create a `requirements.txt` with all dependencies.
 
 4. **Configure environment variables:**
    Create a `.env` file in the `backend` directory:
    ```env
-   LLM_API_KEY=your_llm_api_key
-   OPENAI_API_KEY=your_openai_api_key  # For embeddings
-   SEARCH_API_KEY=your_search_api_key
-   # Add other required environment variables
+   OPENAI_API_KEY=your_openai_api_key_here
+   TAVILY_API_KEY=your_tavily_api_key_here
+   GOOGLE_FACT_CHECK_API_KEY=your_google_factcheck_api_key_here
+   QDRANT_URL=http://localhost:6333
+   QDRANT_COLLECTION_NAME=verifiai_claims
    ```
 
 5. **Run the backend server:**
    ```bash
-   python -m app.main
-   # Or using uvicorn directly:
    uvicorn app.main:app --reload
    ```
-
    The API will be available at `http://localhost:8000`
 
 ### Frontend Setup
@@ -118,73 +243,116 @@ VerifiAI uses an agent-based workflow architecture powered by LangGraph:
 2. **Install dependencies:**
    ```bash
    npm install
-   # or
-   yarn install
-   # or
-   pnpm install
    ```
 
-3. **Run the development server:**
+3. **Configure environment variables:**
+   Create a `.env.local` file:
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:8000
+   DATABASE_URL=your_database_url_here
+   ```
+
+4. **Run the development server:**
    ```bash
    npm run dev
-   # or
-   yarn dev
-   # or
-   pnpm dev
    ```
-
    The application will be available at `http://localhost:3000`
 
-### Docker Setup (Qdrant Vector Database)
+## Key Agent Files
 
-The project uses Qdrant for vector storage and semantic search. To start the Qdrant service:
+| Agent/Node | File |
+|------------|------|
+| QueryGenerator | `backend/app/agents/query_generator.py` |
+| SearchExecutor | `backend/app/agents/search_executor.py` |
+| EvidenceEvaluator | `backend/app/agents/evidence_evaluator.py` |
+| ScoringNode | `backend/app/agents/scoring_node.py` |
+| DomainTrustAgent | `backend/app/agents/domain_trust_agent.py` |
+| SemanticCrossrefAgent | `backend/app/agents/semantic_crossref_agent.py` |
+| GoogleFactCheckAgent | `backend/app/agents/google_factcheck_agent.py` |
+| FakeNewsModelAgent | `backend/app/agents/fake_news_model_agent.py` |
+| ReportGenerator | `backend/app/agents/report_generator.py` |
+| LangGraph Workflow | `backend/app/workflows/verification_workflow.py` |
+| Verification Service | `backend/app/services/verification_service.py` |
+| LLM Service | `backend/app/services/llm_service.py` |
+| Search Service | `backend/app/services/search_service.py` |
 
+## API Documentation
+
+### Verify Claim
+
+**Endpoint:** `POST /api/v1/verification/verify`
+
+**Request Body:**
+```json
+{
+  "claim": "The claim to verify"
+}
+```
+
+**Response:**
+```json
+{
+  "claim": "The original claim",
+  "verdict": "FAKE" | "LEGIT" | "UNCERTAIN",
+  "analysis": "Detailed analysis with evidence and reasoning",
+  "sources": ["url1", "url2", "url3"],
+  "potential_fake_score": 45,  // Only present if verdict == "UNCERTAIN"
+  "score_breakdown": {          // Only present if verdict == "UNCERTAIN"
+    "domain_trust": 15,
+    "semantic_crossref": 12,
+    "google_factcheck": 10,
+    "fake_news_model": 8
+  }
+}
+```
+
+**Example:**
 ```bash
-# From the project root
-docker-compose up -d
+curl -X POST "http://localhost:8000/api/v1/verification/verify" \
+  -H "Content-Type: application/json" \
+  -d '{"claim": "Your claim here"}'
 ```
 
-This will start Qdrant on `http://localhost:6333`. You can access the Qdrant dashboard at `http://localhost:6333/dashboard`.
+## Verification Criteria
 
-To stop the service:
-```bash
-docker-compose down
-```
+### Three-Tier Verdict System
 
-## 🔧 Environment Variables
+- **FAKE**: Positive evidence the claim is false
+  - Contradicted by official sources
+  - Debunked by fact-checkers
+  - Contains proven factual errors
+  
+- **LEGIT**: Clear, authoritative evidence directly confirming the claim
+  - Official statements confirming the claim
+  - Reputable news with primary sources
+  - Fact-checkers verifying the claim
+  
+- **UNCERTAIN**: Default when evidence is insufficient
+  - No credible sources found
+  - Conflicting information
+  - Ambiguous or insufficient evidence
+  - **Critical Rule**: Absence of evidence ≠ evidence of falsehood
 
-### Backend Environment Variables
+### 4-Signal Risk Scoring (UNCERTAIN only)
 
-Create a `.env` file in the `backend` directory with the following variables:
+When verdict is UNCERTAIN, the system applies 4 parallel scoring agents:
 
-```env
-# LLM Provider (OpenAI, Anthropic, etc.)
-LLM_API_KEY=your_llm_api_key_here
+1. **Domain Trust (0-30 points)**: Source credibility based on domain reputation
+2. **Semantic Cross-Reference (0-25 points)**: Semantic similarity between claim and evidence
+3. **Google Fact Check (0-20 points)**: Human fact-checker verdicts
+4. **Fake News Model (0-25 points)**: BERT-based pattern detection
 
-# OpenAI API Key (for embeddings in vector store)
-OPENAI_API_KEY=your_openai_api_key_here
+**Total Risk Score**: 0-100 (higher = more likely fake)
 
-# Search Service Provider
-SEARCH_API_KEY=your_search_api_key_here
+## Performance
 
-# Qdrant Configuration (optional, defaults shown)
-QDRANT_URL=http://localhost:6333
-QDRANT_COLLECTION_NAME=verifiai_claims
-```
+- **Optimized Workflow**: Conditional scoring reduces unnecessary computation
+- **Parallel Execution**: All scoring agents run concurrently
+- **Efficient Model Loading**: ML models loaded once and reused
+- **Error Resilience**: Individual failures don't crash the system
+- **Vector Database Caching**: Qdrant integration for semantic search (optional)
 
-### Frontend Environment Variables
-
-Create a `.env.local` file in the `frontend` directory:
-
-```env
-# Backend API URL
-NEXT_PUBLIC_API_URL=http://localhost:8000
-
-# Database connection (if using Prisma)
-DATABASE_URL=your_database_url_here
-```
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 ai-fake-news/
@@ -194,10 +362,12 @@ ai-fake-news/
 │   │   │   ├── query_generator.py          # Generates search queries
 │   │   │   ├── search_executor.py          # Executes searches
 │   │   │   ├── evidence_evaluator.py       # Evaluates evidence credibility
+│   │   │   ├── scoring_node.py             # Orchestrates 4 scoring agents
 │   │   │   ├── report_generator.py         # Generates final report
-│   │   │   ├── fake_news_model_agent.py    # BERT-based fake news detection
-│   │   │   ├── domain_trust_agent.py        # Domain credibility scoring
-│   │   │   └── semantic_crossref_agent.py  # Semantic similarity analysis
+│   │   │   ├── domain_trust_agent.py       # Domain credibility scoring
+│   │   │   ├── semantic_crossref_agent.py  # Semantic similarity analysis
+│   │   │   ├── google_factcheck_agent.py   # Google Fact Check API
+│   │   │   └── fake_news_model_agent.py    # BERT-based fake news detection
 │   │   ├── api/
 │   │   │   └── routes/
 │   │   │       └── verification.py         # API endpoints
@@ -234,98 +404,12 @@ ai-fake-news/
 │   │   ├── utils.ts              # Utility functions
 │   │   ├── verify.ts             # API client
 │   │   └── prisma.ts             # Prisma client
-│   ├── prisma/
-│   │   ├── schema.prisma         # Database schema
-│   │   └── migrations/           # Database migrations
-│   └── package.json
+│   └── prisma/
+│       ├── schema.prisma         # Database schema
+│       └── migrations/           # Database migrations
 ├── docker-compose.yml            # Docker Compose for Qdrant
-└── README.md
+└── README.md                     # This file
 ```
-
-## 🔌 API Documentation
-
-### Verify Claim
-
-**Endpoint:** `POST /api/v1/verification/verify`
-
-**Request Body:**
-```json
-{
-  "claim": "The claim to verify"
-}
-```
-
-**Response:**
-```json
-{
-  "claim": "The original claim",
-  "verdict": "FAKE" | "LEGIT" | "UNCERTAIN",
-  "analysis": "Detailed analysis with evidence and reasoning",
-  "sources": ["url1", "url2", "url3"]
-}
-```
-
-**Example:**
-```bash
-curl -X POST "http://localhost:8000/api/v1/verification/verify" \
-  -H "Content-Type: application/json" \
-  -d '{"claim": "Your claim here"}'
-```
-
-## 🎯 How It Works
-
-1. **Claim Submission**: User submits a claim through the web interface or API
-2. **Query Generation**: The system generates optimized search queries targeting:
-   - Official government and institutional sources
-   - Fact-checking organizations
-   - Reputable news outlets
-   - Debunking articles
-3. **Evidence Gathering**: Searches are executed and relevant sources are collected
-4. **Multi-Agent Risk Assessment**: The system applies multiple scoring mechanisms:
-   - **Fake News Model**: BERT-based model analyzes the claim text for fake news patterns (0-25 risk)
-   - **Domain Trust Analysis**: Evaluates source credibility based on domain reputation tiers (0-30 risk)
-   - **Semantic Cross-Reference**: Measures semantic similarity between claim and evidence using sentence transformers (0-25 risk)
-5. **Evidence Evaluation**: The system applies rigorous skepticism:
-   - Distinguishes between mentions and verification
-   - Checks for contradictions with official sources
-   - Validates against known facts
-   - Prioritizes authoritative sources
-   - Combines risk scores from multiple agents
-6. **Report Generation**: A comprehensive report is generated with:
-   - Clear verdict (FAKE, LEGIT, or UNCERTAIN)
-   - Detailed analysis with reasoning
-   - Supporting source URLs
-   - Risk score breakdown
-
-## 🔍 Verification Criteria
-
-The system uses the following criteria to evaluate claims:
-
-- **Three-Tier Verdict System**:
-  - **FAKE**: Positive evidence the claim is false (contradicted by official sources, debunked by fact-checkers, contains proven factual errors)
-  - **LEGIT**: Clear, authoritative evidence directly confirming the claim
-  - **UNCERTAIN**: Insufficient evidence, no credible sources found, conflicting information, or ambiguous results (default when evidence is unclear)
-
-- **Multi-Agent Risk Scoring**:
-  - **Fake News Model Score (0-25)**: BERT-based detection of fake news patterns in claim text
-  - **Domain Trust Score (0-30)**: Source credibility based on domain reputation (government > fact-checkers > news > social media)
-  - **Semantic Cross-Reference Score (0-25)**: Semantic similarity between claim and evidence (strong agreement = low risk)
-
-- **Evaluation Principles**:
-  - **Absence of Evidence ≠ Evidence of Falsehood**: No credible sources defaults to UNCERTAIN, not FAKE
-  - **Positive Proof Required**: LEGIT verdict requires clear, authoritative confirmation
-  - **Contradiction Detection**: Claims contradicting official sources are marked FAKE
-  - **Source Hierarchy**: Official sources > Fact-checkers > Reputable news > Social media
-  - **Mention vs. Verification**: Articles mentioning a claim ≠ proof it's true
-
-## ⚡ Performance
-
-VerifiAI has been optimized for fast response times:
-
-- **LLM Response Time**: Improved from averaging 16 seconds to 7 seconds for fake news verification
-- **Optimized Workflow**: Streamlined agent pipeline reduces processing overhead
-- **Efficient Model Loading**: ML models are loaded once and reused across requests
-- **Vector Database Caching**: Qdrant integration enables fast semantic search and result caching
 
 ## 🤝 Contributing
 
@@ -344,10 +428,11 @@ We welcome contributions! Please follow these guidelines:
 ## 🗺️ Roadmap
 
 - [x] Multi-agent risk scoring system
+- [x] Conditional scoring architecture
+- [x] 4-signal credibility framework
+- [x] Error handling and validation
 - [x] Vector database integration (Qdrant)
-- [x] Domain trust analysis
-- [x] Semantic cross-reference scoring
-- [ ] Enhanced evidence scoring algorithms
+- [ ] Enhanced report generation
 - [ ] Support for multiple languages
 - [ ] Chrome extension integration
 - [ ] Comprehensive test coverage
