@@ -1,4 +1,7 @@
+"use client"
 import React from 'react'
+import { usePathname } from 'next/navigation'
+import Link from 'next/link'
 import { Terminal } from 'lucide-react'
 import { History } from 'lucide-react'
 import { LineChart } from 'lucide-react'
@@ -18,6 +21,8 @@ import {
   
 
 const ConsoleSidebar = () => {
+    const pathname = usePathname()
+    
     const items = [
         {
             icon: Terminal,
@@ -44,17 +49,19 @@ const ConsoleSidebar = () => {
                 <SidebarGroupLabel>Console</SidebarGroupLabel>
             </SidebarGroup>
             <SidebarMenu>
-            {items.map((i) => (
-                <SidebarMenuItem className=''>
-                    <SidebarMenuButton className='py-5' asChild>
-                        <a href={`${i.url}`}>
+            {items.map((i) => {
+                const isActive = pathname === i.url
+                return (
+                <SidebarMenuItem key={i.label}>
+                    <SidebarMenuButton className={`py-5 ${isActive ? 'bg-blue-500 text-white' : ''}`} asChild>
+                        <Link href={i.url}>
                             <i.icon />
                             <span>{i.label}</span>
-                        </a>
-
+                        </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
-            ))}
+                )
+            })}
         </SidebarMenu>
         </SidebarContent>
         
