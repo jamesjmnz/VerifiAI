@@ -9,7 +9,7 @@ import { ArrowLeft, Search, SparkleIcon, Sparkles, Terminal } from 'lucide-react
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { verifyClaim } from '@/lib/verify'
-import { VerificationResult } from '../types/verify'
+import { VerificationResult } from '@/app/types/verify'
 
 const Console = () => {
 
@@ -52,7 +52,7 @@ const Console = () => {
 
   return (
     <main>
-        <Header />
+       
         <div className='max-w-4xl mx-auto flex flex-col justify-center min-h-screen'>
             <Link className='flex gap-2 w-fit items-center' href={"/"}><span><ArrowLeft size={15} /></span>Back to Home</Link>
             <div className='flex flex-col items-center gap-5'>
