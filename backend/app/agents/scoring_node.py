@@ -5,9 +5,10 @@ from app.agents.domain_trust_agent import domain_trust_score
 from app.agents.fake_news_model_agent import fake_news_model_score
 from app.agents.google_factcheck_agent import google_factcheck_score
 from app.agents.semantic_crossref_agent import semantic_crossref_score
+from backend.app.models.state import VerificationState
 
 
-async def scoring_node(state: Dict) -> Dict:
+async def scoring_node(state: VerificationState) -> VerificationState:
     """
     Runs ONLY when verdict == 'UNCERTAIN'.
     Runs independent scorers in parallel.

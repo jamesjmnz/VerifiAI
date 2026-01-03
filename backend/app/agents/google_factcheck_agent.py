@@ -41,7 +41,7 @@ def _rating_confidence(textual_rating: str) -> float:
 
     rating = textual_rating.lower()
 
-    for key, confidence in FACT_CHECK_RATINGS:
+    for key, confidence in FACT_CHECK_RATINGS.items():
         if key in rating:
             return confidence
 

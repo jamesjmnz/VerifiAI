@@ -32,7 +32,10 @@ class VerificationService:
             claim=claim,
             analysis = final_state["analysis"],
             verdict = VerdictEnum(final_state["verdict"]),
-            sources = final_state["sources"]
+            sources = final_state["sources"],
+            potential_fake_score = final_state["potential_fake_score"],
+            score_breakdown = final_state["score_breakdown"]
+
         )
 
 verification_service = VerificationService()
