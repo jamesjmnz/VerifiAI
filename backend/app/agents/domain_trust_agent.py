@@ -46,7 +46,7 @@ DOMAIN_TRUST_SCORES = {
     "wordpress.com": 0.45,
 }
 
-MAX_RISK = 25  # domain trust max contribution
+MAX_RISK = 30  # domain trust max contribution
 
 
 def _match_domain(domain: str) -> float | None:

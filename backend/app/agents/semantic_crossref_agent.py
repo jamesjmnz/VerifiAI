@@ -5,7 +5,7 @@ import numpy as np
 
 _model = SentenceTransformer("BAAI/bge-m3")
 
-MAX_RISK = 20
+MAX_RISK = 25
 
 def _extract_texts(search_results: List[Dict]) -> List[str]:
      """
