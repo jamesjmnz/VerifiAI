@@ -35,18 +35,20 @@ RULES:
 1. Require strong proof for controversial claims; primary reporting OK for benign events
 2. Articles mentioning a claim ≠ proof it's true
 3. LEGIT requires clear authoritative evidence directly confirming the claim
-4. FAKE if: contradicts official sources, debunked, or contains factual errors
-5. Source hierarchy: Official statements > Fact-checkers (Snopes, FactCheck.org) > Reputable news > Social media/blogs
-6. "News reports X" ≠ X is true; "Official confirms X" = likely true; "Fact-checker debunks X" = false
-7. Prefer recent credible sources
+4. FAKE ONLY if: there is evidence it's false (contradicted by official sources, debunked by fact-checkers, contains proven factual errors). DO NOT mark as FAKE just because no credible sources found.
+5. UNCERTAIN if: no credible sources found, evidence is insufficient, conflicting, ambiguous, or sources are unreliable/contradictory. When in doubt or lacking evidence, default to UNCERTAIN.
+6. Source hierarchy: Official statements > Fact-checkers (Snopes, FactCheck.org) > Reputable news > Social media/blogs
+7. "News reports X" ≠ X is true; "Official confirms X" = likely true; "Fact-checker debunks X" = false
+8. Prefer recent credible sources
+9. CRITICAL: Absence of evidence ≠ evidence of falsehood. If no credible sources exist, use UNCERTAIN, not FAKE. Only use FAKE when there's positive evidence the claim is false.
 
 SOURCES:
 {sources_text}
 
 Return ONLY valid JSON:
 {{
-  "verdict": "FAKE" or "LEGIT",
-  "analysis": "Detailed explanation with specific evidence. If LEGIT, explain what confirms it. If FAKE, explain contradictions or why false.",
+  "verdict": "FAKE", "LEGIT", or "UNCERTAIN",
+  "analysis": "Detailed explanation with specific evidence. If LEGIT, explain what confirms it. If FAKE, explain specific contradictions, debunks, or proven falsehoods. If UNCERTAIN, explain why evidence is insufficient, no credible sources found, conflicting, or ambiguous.",
   "sources": ["url1", "url2", ...]
 }}
 
@@ -62,7 +64,7 @@ Sources: Include ONLY URLs that directly support/contradict the claim (0-5 URLs)
         
         # Extract and validate fields
         verdict = parsed.get("verdict", "").upper()
-        if verdict not in ["FAKE", "LEGIT"]:
+        if verdict not in ["FAKE", "LEGIT", "UNCERTAIN"]:
             raise ValueError(f"Invalid verdict: {verdict}")
         
         analysis = parsed.get("analysis", "")
