@@ -11,3 +11,5 @@ class VerificationState(TypedDict):
     analysis: str
     verdict: str
     sources: List[str]
+    potential_fake_score: int
+    score_breakdown: Dict[str, int]
