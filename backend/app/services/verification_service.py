@@ -1,5 +1,6 @@
 import time
 from app.models.schema import VerdictEnum, VerificationResponse
+from app.models.state import VerificationState
 from app.workflows.verification_workflow import create_verification_workflow
 
 
@@ -11,13 +12,15 @@ class VerificationService:
         start_time = time.time()
         print(f"[TIMING] Starting verification for claim: {claim[:50]}...")
         
-        initial_state = {
+        initial_state: VerificationState = {
             "claim": claim,
             "search_queries": [],
             "search_results": [],
             "analysis": "",
             "verdict": "",
-            "sources": []
+            "sources": [],
+            "potential_fake_score": None,
+            "score_breakdown": None
         }
 
         workflow_start = time.time()
@@ -30,9 +33,11 @@ class VerificationService:
 
         return VerificationResponse(
             claim=claim,
-            analysis = final_state["analysis"],
-            verdict = VerdictEnum(final_state["verdict"]),
-            sources = final_state["sources"]
+            analysis=final_state["analysis"],
+            verdict=VerdictEnum(final_state["verdict"]),
+            sources=final_state["sources"],
+            potential_fake_score=final_state.get("potential_fake_score"),
+            score_breakdown=final_state.get("score_breakdown")
         )
 
 verification_service = VerificationService()

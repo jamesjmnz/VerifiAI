@@ -1,6 +1,5 @@
 # Confidence scores (0–1)
-from re import L
-from typing import Dict, List
+from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
 
@@ -71,19 +70,25 @@ def _match_domain(domain: str) -> float | None:
 
 def domain_trust_score(search_results: List[Dict]) -> int:
     """
-    Converts domain confidence into risk score (0–25)
+    Converts domain confidence into risk score (0–30)
     Higher score = higher risk
+    
+    Returns MAX_RISK (30) if no search results or invalid URL.
     """
 
     if not search_results:
-        return None
+        return MAX_RISK
 
     url = search_results[0].get("url")
     if not url:
         return MAX_RISK
 
     try:
-        domain = urlparse(url).netloc.replace("www", "")
+        parsed = urlparse(url)
+        domain = parsed.netloc.lower()
+        # Remove www. prefix if present
+        if domain.startswith("www."):
+            domain = domain[4:]
     except Exception:
         return MAX_RISK
 

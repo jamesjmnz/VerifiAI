@@ -1,7 +1,7 @@
 
 
 from enum import Enum
-from typing import List
+from typing import List, Optional, Dict
 
 from pydantic import BaseModel
 
@@ -19,3 +19,6 @@ class VerificationResponse(BaseModel):
     analysis: str
     verdict: VerdictEnum
     sources: List[str]
+    #when verdict == UNCERTAIN
+    potential_fake_score: Optional[int] = None        # 0–100
+    score_breakdown: Optional[Dict[str, int]] = None  # per-agent

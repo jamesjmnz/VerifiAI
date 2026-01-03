@@ -1,7 +1,7 @@
 
 
 import operator
-from typing import Annotated, Dict, List, TypedDict
+from typing import Annotated, Dict, List, Optional, TypedDict
 
 
 class VerificationState(TypedDict):
@@ -11,3 +11,5 @@ class VerificationState(TypedDict):
     analysis: str
     verdict: str
     sources: List[str]
+    potential_fake_score: Optional[int]
+    score_breakdown: Optional[Dict[str, int]]
