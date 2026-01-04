@@ -6,8 +6,7 @@ import { resolve } from "path";
 config({ path: resolve(__dirname, "../.env") });
 
 const nextConfig: NextConfig = {
-  // Remove standalone output for Vercel compatibility
-  // Vercel handles deployment automatically
+  output: "standalone",
 };
 
 export default nextConfig;
