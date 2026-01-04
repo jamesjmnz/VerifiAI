@@ -1,5 +1,5 @@
 import { Input } from '@/components/ui/input'
-import { Clock } from 'lucide-react'
+import { Clock, Search } from 'lucide-react'
 import {
     Select,
     SelectContent,
@@ -17,10 +17,66 @@ import { cn } from '@/lib/utils'
 const History = () => {
 
     const headTable = ["Claim", "Source", "Verdict", "Date", "Action"]
+    const mockHistory = [
+        {
+            id: "1",
+            postUrl: "https://twitter.com/user/status/123456789",
+            extractedClaim: "COVID-19 vaccines contain microchips for tracking",
+            verdict: "fake",
+            confidenceScore: 96,
+            explanation: "This claim has been thoroughly debunked by multiple health organizations including WHO and CDC. No vaccines contain microchips or tracking devices.",
+            timestamp: new Date("2024-01-15T10:30:00"),
+          },
+          {
+            id: "2",
+            postUrl: "https://facebook.com/post/987654321",
+            extractedClaim: "New study shows coffee reduces heart disease risk",
+            verdict: "legit",
+            confidenceScore: 87,
+            explanation: "Multiple peer-reviewed studies support moderate coffee consumption being associated with reduced cardiovascular risk.",
+            timestamp: new Date("2024-01-14T14:22:00"),
+          },
+          {
+            id: "3",
+            postUrl: "https://news.example.com/article/5555",
+            extractedClaim: "Electric cars are worse for the environment than gas cars",
+            verdict: "misleading",
+            confidenceScore: 72,
+            explanation: "While EV production has environmental impacts, lifecycle analyses show EVs typically have lower total emissions than gas vehicles.",
+            timestamp: new Date("2024-01-13T09:15:00"),
+          },
+          {
+            id: "4",
+            postUrl: "https://reddit.com/r/science/comments/abc123",
+            extractedClaim: "5G towers cause cancer in humans",
+            verdict: "fake",
+            confidenceScore: 98,
+            explanation: "No scientific evidence supports this claim. 5G uses non-ionizing radiation that cannot damage DNA or cause cancer.",
+            timestamp: new Date("2024-01-12T16:45:00"),
+          },
+          {
+            id: "5",
+            postUrl: "https://instagram.com/p/xyz789",
+            extractedClaim: "Honey never spoils and has been found in ancient tombs",
+            verdict: "legit",
+            confidenceScore: 94,
+            explanation: "Archaeological evidence confirms honey from Egyptian tombs thousands of years old was still edible due to its unique chemical properties.",
+            timestamp: new Date("2024-01-11T11:00:00"),
+          },
+          {
+            id: "6",
+            postUrl: "https://tiktok.com/@user/video/111222333",
+            extractedClaim: "Eating ice cream before bed causes nightmares",
+            verdict: "misleading",
+            confidenceScore: 58,
+            explanation: "While sugar intake before sleep can affect sleep quality, there's no direct scientific link between ice cream and nightmares specifically.",
+            timestamp: new Date("2024-01-10T20:30:00"),
+          },
+    ]
 
 
   return (
-    <div className='max-w-7xl mx-auto'>
+    <div className='max-w-7xl mx-auto flex flex-col gap-10'>
 
         <header className='flex flex-col gap-1.5'>
             <div className='flex gap-3 items-center'>
@@ -38,23 +94,27 @@ const History = () => {
             </div>
         </header>
 
+
+
+        <main className='gap-5 flex flex-col'>
         <div className='flex gap-5'>
-            <div className='w-full'>
-                <Input />
+            <div className='relative flex-1'>
+                <span className='absolute  text-muted-foreground top-1/2 -translate-y-1/2 left-3'><Search className='h-4 w-4' /></span>
+                <Input className='pl-10' placeholder='Search' /> 
+               
             </div>
             <div>
             <Select>
       <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Select a fruit" />
+        <SelectValue placeholder="Select a verdict" />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          <SelectLabel>Fruits</SelectLabel>
-          <SelectItem value="apple">Apple</SelectItem>
-          <SelectItem value="banana">Banana</SelectItem>
-          <SelectItem value="blueberry">Blueberry</SelectItem>
-          <SelectItem value="grapes">Grapes</SelectItem>
-          <SelectItem value="pineapple">Pineapple</SelectItem>
+          <SelectLabel>Verdicts</SelectLabel>
+          <SelectItem value="default">Default</SelectItem>
+          <SelectItem value="apple">Fake</SelectItem>
+          <SelectItem value="banana">Legit</SelectItem>
+          <SelectItem value="blueberry">Uncertain</SelectItem>
         </SelectGroup>
       </SelectContent>
     </Select>
@@ -64,9 +124,11 @@ const History = () => {
             </div>
         </div>
 
-    <div>
+
+
+    <div className='border rounded-lg'>
         <Table>
-            <TableCaption>6 of 6 Fact Checks</TableCaption>
+            
             <TableHeader>
                 <TableRow className='bg-gray-100'>
                     {headTable.map((h) => (
@@ -76,15 +138,23 @@ const History = () => {
                     ))}
                 </TableRow>
             </TableHeader>
-            <TableBody>
-                <TableCell className='text-center'>COVID-19 vaccines contain microchips for tracking</TableCell>
-                <TableCell className='text-center'>https://twitter.com/user/status/123456789</TableCell>
-                <TableCell className='text-center'>Fake News</TableCell>
-                <TableCell className='text-center'>Jan 15, 2024 at 10:30 AM</TableCell>
-                <TableCell className='text-center'>View</TableCell>
+            <TableBody className=''>
+               {mockHistory.map((history) => (
+                 <TableRow className=''>
+                 <TableCell className='text-center py-6'>{history.extractedClaim}</TableCell>
+                 <TableCell className='text-center text-muted-foreground py-6'>{history.postUrl}</TableCell>
+                 <TableCell className='text-center py-6'><span className='bg-red-100 text-red-500 font-semibold rounded-lg px-4 py-1 text-xs'>{history.verdict}</span></TableCell>
+                 <TableCell className='text-center text-muted-foreground py-6'>Jan 15, 2024 at 10:30 AM</TableCell>
+                 <TableCell className='text-center py-6'>View</TableCell>
+                 </TableRow>
+               ))}
+             
+
+                
             </TableBody>
         </Table>
     </div>
+        </main>
 
     </div>
   )
