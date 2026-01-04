@@ -48,7 +48,7 @@ SOURCES:
 Return ONLY valid JSON:
 {{
   "verdict": "FAKE", "LEGIT", or "UNCERTAIN",
-  "analysis": "Detailed explanation with specific evidence. If LEGIT, explain what confirms it. If FAKE, explain specific contradictions, debunks, or proven falsehoods. If UNCERTAIN, explain why evidence is insufficient, no credible sources found, conflicting, or ambiguous.",
+  "analysis": "Write a general, natural explanation without mentioning specific sources, titles, URLs, or publication names. Focus on the facts and evidence. If LEGIT, explain what confirms it. If FAKE, explain specific contradictions, debunks, or proven falsehoods. If UNCERTAIN, explain why evidence is insufficient, no credible sources found, conflicting, or ambiguous. Write as if explaining to someone without citing sources.",
   "sources": ["url1", "url2", ...]
 }}
 
