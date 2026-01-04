@@ -44,16 +44,19 @@ const ConsoleSidebar = () => {
 
   return (
     <Sidebar>
-        <SidebarContent className='px-5'>
+        <SidebarGroup className='border-b'>
+                <SidebarGroupLabel className='text-xl px-6 py-5 font-semibold'>VerifiAI</SidebarGroupLabel>
+            </SidebarGroup>
+        <SidebarContent className='px-5 gap-0'>
             <SidebarGroup>
-                <SidebarGroupLabel>Console</SidebarGroupLabel>
+                <SidebarGroupLabel className='font-semibold base px-0'>CONSOLE</SidebarGroupLabel>
             </SidebarGroup>
             <SidebarMenu>
             {items.map((i) => {
                 const isActive = pathname === i.url
                 return (
                 <SidebarMenuItem key={i.label}>
-                    <SidebarMenuButton className={`py-5 ${isActive ? 'bg-blue-500 text-white' : ''}`} asChild>
+                    <SidebarMenuButton className={`py-5 font-semibold ${isActive ? 'bg-blue-100 text-blue-500 hover:bg-blue-100 hover:text-blue-500 ' : ''}`} asChild>
                         <Link href={i.url}>
                             <i.icon />
                             <span>{i.label}</span>
