@@ -1,3 +1,4 @@
+"use client"
 import { Input } from '@/components/ui/input'
 import { Clock, Search } from 'lucide-react'
 import {
@@ -9,13 +10,13 @@ import {
     SelectTrigger,
     SelectValue,
   } from "@/components/ui/select"
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 
 const History = () => {
-
+    const [searchQuery, setSearchQuery] = useState<string>("")
     const headTable = ["Claim", "Source", "Verdict", "Date", "Action"]
     const mockHistory = [
         {
@@ -40,7 +41,7 @@ const History = () => {
             id: "3",
             postUrl: "https://news.example.com/article/5555",
             extractedClaim: "Electric cars are worse for the environment than gas cars",
-            verdict: "misleading",
+            verdict: "uncertain",
             confidenceScore: 72,
             explanation: "While EV production has environmental impacts, lifecycle analyses show EVs typically have lower total emissions than gas vehicles.",
             timestamp: new Date("2024-01-13T09:15:00"),
@@ -67,12 +68,43 @@ const History = () => {
             id: "6",
             postUrl: "https://tiktok.com/@user/video/111222333",
             extractedClaim: "Eating ice cream before bed causes nightmares",
-            verdict: "misleading",
+            verdict: "uncertain",
             confidenceScore: 58,
             explanation: "While sugar intake before sleep can affect sleep quality, there's no direct scientific link between ice cream and nightmares specifically.",
             timestamp: new Date("2024-01-10T20:30:00"),
           },
     ]
+
+    const verdictStyle = [
+        {
+            verdict: "fake",
+            full_verdict: "Fake News",
+            style: "bg-red-500/10 text-red-600 border-red-500/20 font-semibold"
+        },
+        {
+            verdict: "legit",
+            full_verdict: "Legitimate",
+            style: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-semibold"
+        },
+        {
+            verdict: "uncertain",
+            full_verdict: "Uncertain",
+            style: "bg-amber-500/10 text-amber-600 border-amber-500/20 font-semibold"
+        }
+    ]
+
+    const filteredData = useMemo(() => {
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase()
+            return mockHistory.filter((item) => item.extractedClaim.toLowerCase().includes(query))
+        } else {
+            return mockHistory
+        }
+    }, [searchQuery])
+
+   
+
+
 
 
   return (
@@ -100,7 +132,7 @@ const History = () => {
         <div className='flex gap-5'>
             <div className='relative flex-1'>
                 <span className='absolute  text-muted-foreground top-1/2 -translate-y-1/2 left-3'><Search className='h-4 w-4' /></span>
-                <Input className='pl-10' placeholder='Search' /> 
+                <Input className='pl-10' placeholder='Search' value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} /> 
                
             </div>
             <div>
@@ -139,15 +171,18 @@ const History = () => {
                 </TableRow>
             </TableHeader>
             <TableBody className=''>
-               {mockHistory.map((history) => (
-                 <TableRow className=''>
+               {filteredData.map((history) => {
+                 const verdictInfo = verdictStyle.find(v => v.verdict === history.verdict) || verdictStyle[0];
+                 return (
+                 <TableRow key={history.id} className=''>
                  <TableCell className='text-center py-6'>{history.extractedClaim}</TableCell>
                  <TableCell className='text-center text-muted-foreground py-6'>{history.postUrl}</TableCell>
-                 <TableCell className='text-center py-6'><span className='bg-red-100 text-red-500 font-semibold rounded-lg px-4 py-1 text-xs'>{history.verdict}</span></TableCell>
+                 <TableCell className='text-center py-6'><span className={cn('rounded-lg px-4 py-1 text-xs', verdictInfo.style)}>{verdictInfo.full_verdict}</span></TableCell>
                  <TableCell className='text-center text-muted-foreground py-6'>Jan 15, 2024 at 10:30 AM</TableCell>
                  <TableCell className='text-center py-6'>View</TableCell>
                  </TableRow>
-               ))}
+               )})}
+             
              
 
                 
