@@ -14,6 +14,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { signInWithGoogle } from "@/lib/auth-client"
 
 export function LoginForm({
   className,
@@ -54,7 +55,14 @@ export function LoginForm({
               </Field>
               <Field>
                 <Button type="submit">Login</Button>
-                <Button variant="outline" type="button">
+                <Button 
+                  variant="outline" 
+                  type="button"
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    await signInWithGoogle();
+                  }}
+                >
                   Login with Google
                 </Button>
                 <FieldDescription className="text-center">
