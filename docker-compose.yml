@@ -1,5 +1,63 @@
 services:
+  # Vector Database (Qdrant)
   vector-db:
-    image: qdrant/qdrant
+    image: qdrant/qdrant:latest
+    container_name: qdrant
     ports:
-      - 6333:6333
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    networks:
+      - verifiai-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: verifiai-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - GOOGLE_FACT_CHECK_API_KEY=${GOOGLE_FACT_CHECK_API_KEY}
+      - QDRANT_URL=http://vector-db:6333
+      - QDRANT_COLLECTION_NAME=verifiai_claims
+    networks:
+      - verifiai-network
+    depends_on:
+      vector-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: verifiai-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - DATABASE_URL=${DATABASE_URL}
+    networks:
+      - verifiai-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  qdrant_storage:
+
+networks:
+  verifiai-network:
+    driver: bridge
