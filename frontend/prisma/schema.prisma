@@ -12,23 +12,28 @@ datasource db {
   provider = "postgresql"
 }
 
-
-
 model User {
-  id String @id @default(uuid()) 
-  email String @unique
-  name String
-  createdAt DateTime @default(now())
-  claims Claim[]
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String
+  createdAt     DateTime  @default(now())
+  claims        Claim[]
+  emailVerified Boolean   @default(false)
+  image         String?
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("user")
 }
 
 model Claim {
-  id Int @id @default(autoincrement())
-  userId String
-  text String
+  id        Int      @id @default(autoincrement())
+  userId    String
+  text      String
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user   User         @relation(fields: [userId], references: [id])
   result ClaimResult?
 
 }
@@ -40,23 +45,71 @@ enum Verdict {
 }
 
 model ClaimResult {
-  id Int @id @default(autoincrement())
-  claimId Int @unique
-  verdict Verdict
-  analysis String
+  id         Int      @id @default(autoincrement())
+  claimId    Int      @unique
+  verdict    Verdict
+  analysis   String
   confidence Int
-  createdAt DateTime @default(now())
+  createdAt  DateTime @default(now())
 
-  claim Claim @relation(fields: [claimId], references:  [id])
+  claim   Claim    @relation(fields: [claimId], references: [id])
   sources Source[]
 }
 
 model Source {
-  id Int @default(autoincrement())
-  claimResultId Int @unique
-  title String
-  description String?
-  url String?
+  id            Int     @default(autoincrement())
+  claimResultId Int     @unique
+  title         String
+  description   String?
+  url           String?
 
   claimResult ClaimResult @relation(fields: [claimResultId], references: [id])
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
 }
