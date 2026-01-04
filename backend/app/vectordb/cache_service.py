@@ -1,6 +1,6 @@
 # app/vectordb/cache_service.py
 from datetime import datetime
-from langchain.schema import Document
+from langchain_core.documents import Document
 from app.vectordb.qdrant_store import vectorstore
 
 SIMILARITY_THRESHOLD = 0.85

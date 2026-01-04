@@ -20,7 +20,7 @@ const navigations = [
             )}
         </div>
         <div>
-            <Link href={"/console"}>
+            <Link href={"/console/verify"}>
             <Button>
                 Open Console
             </Button>
