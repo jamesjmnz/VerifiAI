@@ -20,8 +20,8 @@ services:
   # Backend API Service
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: verifiai-backend
     ports:
       - "8000:8000"
