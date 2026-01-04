@@ -17,6 +17,11 @@ app.add_middleware(
 def root():
     return {"status": "running"}
 
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
 
 app.include_router(verification.router)
 
