@@ -3,8 +3,11 @@ import React from 'react'
 import { DialogHeader } from './dialog'
 import { Button } from './button'
 import Link from 'next/link'
-import { Brain, Check, Link2, Link2Icon, Link2Off, LinkIcon, LucideLink, Share, X } from 'lucide-react'
+import { Brain, Check, CheckCheckIcon, Link2, Link2Icon, Link2Off, LinkIcon, LucideLink, Share, ShieldQuestionMark, X } from 'lucide-react'
 import { VerificationResult } from '@/app/types/verify'
+import { ShieldX } from 'lucide-react';
+
+
 
 
 type Props = {
@@ -30,7 +33,37 @@ const mockSources = [
   }
 ]
 
+
+const schemaStyle = [
+  {
+    verdict: "FAKE",
+    full_verdict: "Fake News",
+    style: "bg-red-100 text-red-500",
+    icon: ShieldX
+    
+  },
+  {
+    verdict: "LEGIT",
+    full_verdict: "Legitimate",
+    style: "bg-green-100 text-green-500",
+    icon: CheckCheckIcon
+  },
+  {
+    verdict: "UNCERTAIN",
+    full_verdict: "Uncertain",
+    style: "bg-amber-100 text-amber-500",
+    icon: ShieldQuestionMark
+  }
+
+]
+
+
+
 const Modal = ({claim, open, loading, result, onClose}: Props) => {
+
+
+
+
 
   if (!open) return null
 
@@ -43,7 +76,21 @@ const Modal = ({claim, open, loading, result, onClose}: Props) => {
           <>
             <div className='flex justify-between items-center pb-5'>
           <h1 className='text-2xl font-bold'>Fact Check Result</h1>
-          <Button className={`rounded-full ${result.verdict == "FAKE" ? "bg-red-500" : "bg-green-500"} text-white`} ><span>{result.verdict == "FAKE" ? <X /> : <Check /> }</span>{result.verdict}</Button>
+
+         <div className="flex items-center gap-2">
+        
+         <Button variant={"outline"} className={schemaStyle.find((schema) => schema.verdict === result?.verdict)?.style || ""}>
+          <span>
+          {(() => {
+            const Icon = schemaStyle.find((schema) => schema.verdict === result?.verdict)?.icon;
+            return Icon ? <Icon size={18} /> : null;
+          })()}
+          </span>
+           <p className='font-semibold '>
+           {result.verdict}
+           </p>
+          </Button>
+         </div>
         </div>
         <div className='flex flex-col gap-2.5 pb-5'>
           <h1 className='text-base font-semibold flex items-center gap-2'><span><Brain className='text-blue-500' size={18}/></span>AI Analysis</h1>
