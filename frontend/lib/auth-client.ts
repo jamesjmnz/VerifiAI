@@ -7,3 +7,8 @@ export const signInWithGoogle = async () => {
     provider: "google",
   });
 };
+
+export async function logout() {
+  await authClient.signOut()
+  window.location.href = "/"
+}
