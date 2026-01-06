@@ -4,6 +4,8 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -47,9 +49,10 @@ enum Verdict {
 model ClaimResult {
   id         Int      @id @default(autoincrement())
   claimId    Int      @unique
-  verdict    Verdict
   analysis   String
-  confidence Int
+  verdict    Verdict
+  potential_fake_score Int?
+  score_breakdown     Json?
   createdAt  DateTime @default(now())
 
   claim   Claim    @relation(fields: [claimId], references: [id])
