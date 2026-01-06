@@ -8,8 +8,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft, Search, SparkleIcon, Sparkles, Terminal } from 'lucide-react'
 import Link from 'next/link'
 import React, { useState } from 'react'
-import { verifyClaim } from '@/lib/verify'
+import { verifyAndSaveClaim, verifyClaim } from '@/lib/verify'
 import { VerificationResult } from '@/app/types/verify'
+import { verifyClaimResult } from '@/lib/api/claims'
 
 const Console = () => {
 
@@ -40,9 +41,9 @@ const Console = () => {
         setLoading(true)
 
         try {
-            const data = await verifyClaim(claim)
-            setResult(data) 
-            console.log(result?.sources)
+            const claimData = await verifyAndSaveClaim(claim)
+            setResult(claimData)
+            console.log(claimData.sources)
         } catch(err) {
             console.error(err)
         } finally {
