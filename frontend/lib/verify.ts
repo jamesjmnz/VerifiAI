@@ -18,3 +18,26 @@ export async function verifyClaim(claim: string): Promise<VerificationResult> {
 
     return res.json()
 }
+
+/**
+ * Verify a claim and save it to the database
+ * This function verifies the claim and automatically saves both the claim and result to the database
+ * @param claim - The claim text to verify
+ * @returns Promise with the verification result including claimId and resultId
+ */
+export async function verifyAndSaveClaim(claim: string): Promise<VerificationResult & { claimId: number; resultId: number }> {
+    const res = await fetch("/api/verify", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ claim })
+    })
+
+    if (!res.ok) {
+        const error = await res.json().catch(() => ({ error: "Verification Failed" }))
+        throw new Error(error.error || "Verification Failed")
+    }
+
+    return res.json()
+}

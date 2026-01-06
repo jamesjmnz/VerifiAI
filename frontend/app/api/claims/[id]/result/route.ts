@@ -25,14 +25,19 @@ export async function POST(req: Request, {params}: {params: {id: string}}) {
             verdict: verification.verdict,
             analysis: verification.analysis,
             potential_fake_score: verification.potential_fake_score || null,
-            score_breakdown: verification.score_breakdown ? JSON.parse(JSON.stringify(verification.score_breakdown)) : null 
-
+            score_breakdown: verification.score_breakdown ? JSON.parse(JSON.stringify(verification.score_breakdown)) : null ,
+            sources: verification.sources
 
 
         }
     })
 
+    return NextResponse.json(result)
+
    } catch (error) {
-        
+        return NextResponse.json(
+            {error: "Verification Failed"},
+            {status: 500}
+        )
    }
 }
