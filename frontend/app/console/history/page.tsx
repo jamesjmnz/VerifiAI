@@ -27,6 +27,7 @@ const History = () => {
     const [verdictFilter, setVerdictFilter] = useState<string>("default")
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedClaim, setSelectedClaim] = useState<ClaimData | null>(null);
     
 
     useEffect(() => {
@@ -163,7 +164,10 @@ const History = () => {
                    <Button 
                      className='text-xs hover:cursor-pointer' 
                      variant={"outline"}
-                     onClick={() => setIsModalOpen(true)}
+                     onClick={() => {
+                       setSelectedClaim(claim);
+                       setIsModalOpen(true);
+                     }}
                    >
                      View
                    </Button>
@@ -187,10 +191,18 @@ const History = () => {
       <p>No data found.</p>
     </>}
 
-    <ClaimResultModal 
-      open={isModalOpen} 
-      onOpenChange={setIsModalOpen} 
-    />
+    {selectedClaim && (
+      <ClaimResultModal 
+        open={isModalOpen} 
+        onOpenChange={(open) => {
+          setIsModalOpen(open);
+          if (!open) {
+            setSelectedClaim(null);
+          }
+        }} 
+        claim={selectedClaim}
+      />
+    )}
        
     </div>
   )
