@@ -17,6 +17,7 @@ import { cn, formatDate, truncate } from '@/lib/utils'
 import { VerificationResult } from '@/app/types/verify'
 import { fetchMyClaims } from '@/lib/api/claims'
 import { ClaimData } from '@/app/types/claimData'
+import ClaimResultModal from '@/components/ui/claimResultModal'
 
 const History = () => {
     const [searchQuery, setSearchQuery] = useState<string>("")
@@ -25,6 +26,7 @@ const History = () => {
     const [error, setError] = useState<string | null>(null);
     const [verdictFilter, setVerdictFilter] = useState<string>("default")
     const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     
 
     useEffect(() => {
@@ -104,8 +106,9 @@ const History = () => {
         </header>
 
 
-
-        <main className='gap-5 flex flex-col'>
+    {claims.length > 0 ? (
+      <>  
+         <main className='gap-5 flex flex-col'>
         <div className='flex gap-5'>
             <div className='relative flex-1'>
                 <span className='absolute  text-muted-foreground top-1/2 -translate-y-1/2 left-3'><Search className='h-4 w-4' /></span>
@@ -141,7 +144,7 @@ const History = () => {
             <TableHeader>
                 <TableRow className='bg-gray-100'>
                     {headTable.map((h) => (
-                        <TableHead key={h} className={cn("text-center", h === "Claim" && "w-[200px]")}>
+                        <TableHead key={h} className={cn("text-center", h === "Claim" && "w-[300px]")}>
                             {h}
                         </TableHead>
                     ))}
@@ -152,11 +155,19 @@ const History = () => {
                  const verdictInfo = verdictStyle.find(v => v.verdict === claim?.result?.verdict) || verdictStyle[0];
                  return (
                  <TableRow key={i} className=''>
-                 <TableCell className='text-center py-6 '>{truncate(claim?.text || "", 50)}</TableCell>
-                 <TableCell className='text-center text-muted-foreground py-6'>{claim?.result?.sources.length + " Verified Sources"  }</TableCell>
-                 <TableCell className='text-center py-6'><span className={cn('rounded-lg px-4 py-1 text-xs', verdictInfo.style)}>{verdictInfo.full_verdict}</span></TableCell>
-                 <TableCell className='text-center text-muted-foreground py-6'>{formatDate(claim?.result?.createdAt || "")}</TableCell>
-                 <TableCell className='text-center py-6'><Button className='text-xs hover:cursor-pointer' variant={"outline"}>View</Button></TableCell>
+                 <TableCell className='text-center font-medium py-0 whitespace-normal  '>{truncate(claim?.text || "", 100)}</TableCell>
+                 <TableCell className='text-center text-muted-foreground py-5'>{claim?.result?.sources.length + " Verified Sources"  }</TableCell>
+                 <TableCell className='text-center py-5'><span className={cn('rounded-lg px-4 py-1 text-xs', verdictInfo.style)}>{verdictInfo.full_verdict}</span></TableCell>
+                 <TableCell className='text-center text-muted-foreground'>{formatDate(claim?.result?.createdAt || "")}</TableCell>
+                 <TableCell className='text-center py-6'>
+                   <Button 
+                     className='text-xs hover:cursor-pointer' 
+                     variant={"outline"}
+                     onClick={() => setIsModalOpen(true)}
+                   >
+                     View
+                   </Button>
+                 </TableCell>
                  </TableRow>
                )})}
              
@@ -166,8 +177,21 @@ const History = () => {
             </TableBody>
         </Table>
     </div>
+
+         
+
         </main>
 
+      </>
+    ) : <>
+      <p>No data found.</p>
+    </>}
+
+    <ClaimResultModal 
+      open={isModalOpen} 
+      onOpenChange={setIsModalOpen} 
+    />
+       
     </div>
   )
 }
