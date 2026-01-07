@@ -1,5 +1,6 @@
 import time
 from datetime import datetime
+from urllib.parse import urlparse
 from app.models.state import VerificationState
 from app.services.llm_service import llm_service
 from app.utils.json_parser import safe_json_parse
@@ -13,37 +14,67 @@ def evidence_evaluator_node(state: VerificationState) -> VerificationState:
     results = state["search_results"]
     current_date = datetime.now().date().isoformat()
 
-    # Optimize sources text construction
+    # Optimize sources text construction with better domain identification
     sources_parts = []
     for i, r in enumerate(results, 1):
         title = r.get("title", "")
         content = r.get("content", "")
         url = r.get("url", "")
-        sources_parts.append(f"Source {i}\nTitle: {title}\nContent: {content}\nURL: {url}")
+        # Extract domain for better identification of official pages
+        domain = ""
+        if url:
+            try:
+                parsed = urlparse(url)
+                domain = parsed.netloc.replace("www.", "")
+            except:
+                pass
+        
+        source_info = f"Source {i}\nTitle: {title}\nContent: {content}\nURL: {url}"
+        if domain:
+            source_info += f"\nDomain: {domain}"
+        sources_parts.append(source_info)
     sources_text = "\n\n".join(sources_parts)
 
     print("==========" * 2)
     print(f"SOURCES:\n\n {sources_text}")
 
     # Concise prompt for faster processing
-    prompt = f"""Fact-check this claim with extreme skepticism.
+    prompt = f"""Fact-check this claim. Be appropriately skeptical: strict for controversial claims, reasonable for straightforward factual claims.
 
 CLAIM: {claim}
 DATE: {current_date}
 
 RULES:
-1. Require strong proof for controversial claims; primary reporting OK for benign events
-2. Articles mentioning a claim ≠ proof it's true
-3. LEGIT requires clear authoritative evidence directly confirming the claim
+1. Adjust skepticism by claim type: Require strong proof for controversial/political claims; accept primary reporting for straightforward factual events (sports results, personal achievements, public events, etc.)
+2. CRITICAL DISTINCTION: 
+   - "Articles mentioning a claim" = articles that just reference/quote the claim without reporting the underlying event
+   - "Articles reporting the same event" = articles that independently report the actual event/fact with matching details
+   - If multiple sources independently report the SAME event with matching key facts (names, dates, outcomes), that is CONFIRMATION, not just mention
+3. LEGIT when: 
+   - One authoritative source (government, fact-checker, major news org) directly confirms the claim, OR
+   - Multiple independent sources (2+ news sites, social media from news orgs, YouTube channels) report the same event with matching key facts
+   - For straightforward claims (sports, achievements, events): Multiple sources reporting same story = LEGIT
 4. FAKE ONLY if: there is evidence it's false (contradicted by official sources, debunked by fact-checkers, contains proven factual errors). DO NOT mark as FAKE just because no credible sources found.
 5. UNCERTAIN if: no credible sources found, evidence is insufficient, conflicting, ambiguous, or sources are unreliable/contradictory. When in doubt or lacking evidence, default to UNCERTAIN.
-6. Source hierarchy: Official statements > Fact-checkers (Snopes, FactCheck.org) > Reputable news > Social media/blogs
-7. "News reports X" ≠ X is true; "Official confirms X" = likely true; "Fact-checker debunks X" = false
-8. Prefer recent credible sources
-9. CRITICAL: Absence of evidence ≠ evidence of falsehood. If no credible sources exist, use UNCERTAIN, not FAKE. Only use FAKE when there's positive evidence the claim is false.
+6. Source hierarchy: Official statements > Fact-checkers (Snopes, FactCheck.org) > Reputable news (including official social media pages) > News websites/blogs > Random social media/blogs
+7. IMPORTANT: Official social media pages of reputable news organizations (e.g., facebook.com/inquirerdotnet, twitter.com/inquirerdotnet, threads.com/@philstarlife) should be treated as REPUTABLE NEWS sources, NOT as low-quality social media. Look for verified pages, official domain names in URLs, or clear indicators that it's the official page of a known news organization.
+8. Multiple source confirmation: When 2+ independent sources (news sites, news org social media, YouTube news channels) report the same factual claim with matching details, treat as LEGIT. This is especially true for non-controversial claims (sports, achievements, public events).
+9. Prefer recent credible sources
+10. CRITICAL: Absence of evidence ≠ evidence of falsehood. If no credible sources exist, use UNCERTAIN, not FAKE. Only use FAKE when there's positive evidence the claim is false.
 
 SOURCES:
 {sources_text}
+
+SOURCE EVALUATION GUIDELINES:
+- If a URL is from facebook.com, twitter.com, threads.com, or other social media platforms, check if it's an OFFICIAL page of a reputable news organization:
+  * Look for verified badges, official page names matching known news orgs (e.g., "Inquirer.net", "Philippine Daily Inquirer", "Rappler", "ABS-CBN News", "GMA News", "CNN Philippines", "PhilStar Life")
+  * Official news org social media pages should be treated as REPUTABLE NEWS sources
+  * Examples: facebook.com/inquirerdotnet, facebook.com/rapplerdotcom, twitter.com/inquirerdotnet, threads.com/@philstarlife
+- Random social media posts from individuals or unverified pages = low quality
+- Official news organization websites (inquirer.net, rappler.com, thesummitexpress.com, etc.) = acceptable quality for factual reporting
+- Official news organization social media pages = acceptable quality (same as their websites)
+- YouTube channels from news organizations = acceptable quality
+- For straightforward factual claims: If multiple sources (news sites, news org social media) independently report the same story with matching details, that confirms the claim
 
 Return ONLY valid JSON:
 {{
@@ -52,7 +83,7 @@ Return ONLY valid JSON:
   "sources": ["url1", "url2", ...]
 }}
 
-Sources: Include ONLY URLs that directly support/contradict the claim (0-5 URLs). One authoritative source is sufficient. Empty array if none directly relevant."""
+Sources: Include URLs from sources that directly support or contradict the claim (0-5 URLs). If multiple sources independently report the same event with matching facts, include their URLs. Empty array only if no sources directly relevant."""
 
     llm_start = time.time()
     response = llm_service.invoke(prompt)
