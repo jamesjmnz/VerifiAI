@@ -2,8 +2,9 @@ import React from 'react'
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from './dialog'
 import { Button } from './button'
 import { ClaimData } from '@/app/types/claimData'
-import { Calendar, History, Timer, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react'
-import { formatDate } from '@/lib/utils'
+import { Calendar, History, Timer, CheckCircle2, XCircle, AlertTriangle, LucideLink } from 'lucide-react'
+import { formatDate, getSourceTitle } from '@/lib/utils'
+import Link from 'next/link'
 
 interface ClaimResultModalProps {
   open: boolean
@@ -59,9 +60,25 @@ const claimResultModal: React.FC<ClaimResultModalProps> = ({ open, onOpenChange,
 
                 <div className='flex flex-col gap-1.5'>
                     <p className='text-sm text-muted-foreground'>Source URL</p>
-                    {claim.result?.sources.map((source) => (
-                       <p className=' p-2 text-blue-600'>{source}</p>
-                    ))}
+                    {claim.result?.sources && claim.result.sources.length > 0 ? (
+                      claim.result.sources.map((source, index) => (
+                        <Link key={index} href={source} target="_blank" rel="noopener noreferrer">
+                          <div className='outline rounded-lg px-4 py-4 flex items-center justify-between bg-gray-10 hover:bg-gray-50 transition-colors cursor-pointer'>
+                            <div className='flex flex-col'>
+                              <h1 className='font-bold text-base'>{getSourceTitle(source)}</h1>
+                              <p className='text-muted-foreground text-sm truncate max-w-md'>{source}</p>
+                            </div>
+                            <div>
+                              <LucideLink className='text-muted-foreground' size={18} />
+                            </div>
+                          </div>
+                        </Link>
+                      ))
+                    ) : (
+                      <div className='outline rounded-lg px-4 py-4 bg-gray-10'>
+                        <p className='text-muted-foreground text-sm'>No sources available</p>
+                      </div>
+                    )}
                 </div>
 
                 <div className='flex flex-col gap-1.5'>

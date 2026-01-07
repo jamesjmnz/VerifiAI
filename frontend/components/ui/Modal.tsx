@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Brain, CheckCheckIcon, Link2, LucideLink, ShieldQuestionMark, Loader2, ShieldX } from 'lucide-react'
 import { VerificationResult } from '@/app/types/verify'
 import { Skeleton } from './skeleton'
+import { getSourceTitle } from '@/lib/utils'
 
 
 
@@ -14,27 +15,6 @@ type Props = {
   loading: boolean,
   result: VerificationResult | null
   onClose: () => void
-}
-
-// Helper function to extract domain name from URL
-const getDomainFromUrl = (url: string): string => {
-  try {
-    const urlObj = new URL(url)
-    return urlObj.hostname.replace('www.', '')
-  } catch {
-    return url
-  }
-}
-
-// Helper function to get a readable title from URL
-const getSourceTitle = (url: string): string => {
-  const domain = getDomainFromUrl(url)
-  // Capitalize first letter and format common domains
-  const parts = domain.split('.')
-  if (parts.length > 0) {
-    return parts[0].charAt(0).toUpperCase() + parts[0].slice(1)
-  }
-  return domain
 }
 
 
