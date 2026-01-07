@@ -11,3 +11,18 @@ export function truncate(text: string, maxLength: number, suffix: string = "..."
   }
   return text.slice(0, maxLength - suffix.length) + suffix
 }
+
+
+export function formatDate(date: string | Date) {
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+
+  return dateObj.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  })
+
+}

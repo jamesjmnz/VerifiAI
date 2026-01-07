@@ -13,7 +13,7 @@ import {
 import React, { useState, useMemo, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { cn, truncate } from '@/lib/utils'
+import { cn, formatDate, truncate } from '@/lib/utils'
 import { VerificationResult } from '@/app/types/verify'
 import { fetchMyClaims } from '@/lib/api/claims'
 import { ClaimData } from '@/app/types/claimData'
@@ -149,9 +149,9 @@ const History = () => {
                  return (
                  <TableRow key={i} className=''>
                  <TableCell className='text-center py-6 '>{truncate(claim?.text || "", 50)}</TableCell>
-                 <TableCell className='text-center text-muted-foreground py-6'>{truncate(claim?.result?.sources?.join(", ") || "", 50)}</TableCell>
+                 <TableCell className='text-center text-muted-foreground py-6'>{claim?.result?.sources.length + " Verified Sources"  }</TableCell>
                  <TableCell className='text-center py-6'><span className={cn('rounded-lg px-4 py-1 text-xs', verdictInfo.style)}>{verdictInfo.full_verdict}</span></TableCell>
-                 <TableCell className='text-center text-muted-foreground py-6'>Jan 15, 2024 at 10:30 AM</TableCell>
+                 <TableCell className='text-center text-muted-foreground py-6'>{formatDate(claim?.result?.createdAt || "")}</TableCell>
                  <TableCell className='text-center py-6'>View</TableCell>
                  </TableRow>
                )})}
