@@ -10,100 +10,80 @@ import {
     SelectTrigger,
     SelectValue,
   } from "@/components/ui/select"
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { cn } from '@/lib/utils'
+import { cn, formatDate, truncate } from '@/lib/utils'
+import { VerificationResult } from '@/app/types/verify'
+import { fetchMyClaims } from '@/lib/api/claims'
+import { ClaimData } from '@/app/types/claimData'
+import ClaimResultModal from '@/components/ui/claimResultModal'
 
 const History = () => {
     const [searchQuery, setSearchQuery] = useState<string>("")
+    const [claims, setClaims] = useState<ClaimData[]>([])
     const headTable = ["Claim", "Source", "Verdict", "Date", "Action"]
-    const mockHistory = [
-        {
-            id: "1",
-            postUrl: "https://twitter.com/user/status/123456789",
-            extractedClaim: "COVID-19 vaccines contain microchips for tracking",
-            verdict: "fake",
-            confidenceScore: 96,
-            explanation: "This claim has been thoroughly debunked by multiple health organizations including WHO and CDC. No vaccines contain microchips or tracking devices.",
-            timestamp: new Date("2024-01-15T10:30:00"),
-          },
-          {
-            id: "2",
-            postUrl: "https://facebook.com/post/987654321",
-            extractedClaim: "New study shows coffee reduces heart disease risk",
-            verdict: "legit",
-            confidenceScore: 87,
-            explanation: "Multiple peer-reviewed studies support moderate coffee consumption being associated with reduced cardiovascular risk.",
-            timestamp: new Date("2024-01-14T14:22:00"),
-          },
-          {
-            id: "3",
-            postUrl: "https://news.example.com/article/5555",
-            extractedClaim: "Electric cars are worse for the environment than gas cars",
-            verdict: "uncertain",
-            confidenceScore: 72,
-            explanation: "While EV production has environmental impacts, lifecycle analyses show EVs typically have lower total emissions than gas vehicles.",
-            timestamp: new Date("2024-01-13T09:15:00"),
-          },
-          {
-            id: "4",
-            postUrl: "https://reddit.com/r/science/comments/abc123",
-            extractedClaim: "5G towers cause cancer in humans",
-            verdict: "fake",
-            confidenceScore: 98,
-            explanation: "No scientific evidence supports this claim. 5G uses non-ionizing radiation that cannot damage DNA or cause cancer.",
-            timestamp: new Date("2024-01-12T16:45:00"),
-          },
-          {
-            id: "5",
-            postUrl: "https://instagram.com/p/xyz789",
-            extractedClaim: "Honey never spoils and has been found in ancient tombs",
-            verdict: "legit",
-            confidenceScore: 94,
-            explanation: "Archaeological evidence confirms honey from Egyptian tombs thousands of years old was still edible due to its unique chemical properties.",
-            timestamp: new Date("2024-01-11T11:00:00"),
-          },
-          {
-            id: "6",
-            postUrl: "https://tiktok.com/@user/video/111222333",
-            extractedClaim: "Eating ice cream before bed causes nightmares",
-            verdict: "uncertain",
-            confidenceScore: 58,
-            explanation: "While sugar intake before sleep can affect sleep quality, there's no direct scientific link between ice cream and nightmares specifically.",
-            timestamp: new Date("2024-01-10T20:30:00"),
-          },
-    ]
+    const [error, setError] = useState<string | null>(null);
+    const [verdictFilter, setVerdictFilter] = useState<string>("default")
+    const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedClaim, setSelectedClaim] = useState<ClaimData | null>(null);
+    
+
+    useEffect(() => {
+      const loadClaims = async () => {
+        try {
+          const data = await fetchMyClaims()
+          setClaims(data);
+        } catch(err) {
+            setError("Failed to load claims")
+        } finally {
+          setLoading(false)
+        }
+      }
+
+      loadClaims()
+
+    }, [])
 
     const verdictStyle = [
         {
-            verdict: "fake",
+            verdict: "FAKE",
             full_verdict: "Fake News",
             style: "bg-red-500/10 text-red-600 border-red-500/20 font-semibold"
         },
         {
-            verdict: "legit",
+            verdict: "LEGIT",
             full_verdict: "Legitimate",
             style: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-semibold"
         },
         {
-            verdict: "uncertain",
+            verdict: "UNCERTAIN",
             full_verdict: "Uncertain",
             style: "bg-amber-500/10 text-amber-600 border-amber-500/20 font-semibold"
         }
     ]
 
     const filteredData = useMemo(() => {
+
+      let filtered = claims;
+
+      
         if (searchQuery) {
             const query = searchQuery.toLowerCase()
-            return mockHistory.filter((item) => item.extractedClaim.toLowerCase().includes(query))
-        } else {
-            return mockHistory
+            filtered =  filtered.filter((claim) => claim.text.toLowerCase().includes(query))
+        } 
+
+        if (verdictFilter && verdictFilter != "default" ) {
+          filtered = filtered.filter((claim) => claim?.result?.verdict === verdictFilter)
         }
-    }, [searchQuery])
+
+        return filtered
+    }, [searchQuery, claims, verdictFilter])
 
    
-
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>{error}</p>;
 
 
 
@@ -127,8 +107,9 @@ const History = () => {
         </header>
 
 
-
-        <main className='gap-5 flex flex-col'>
+    {claims.length > 0 ? (
+      <>  
+         <main className='gap-5 flex flex-col'>
         <div className='flex gap-5'>
             <div className='relative flex-1'>
                 <span className='absolute  text-muted-foreground top-1/2 -translate-y-1/2 left-3'><Search className='h-4 w-4' /></span>
@@ -136,7 +117,7 @@ const History = () => {
                
             </div>
             <div>
-            <Select>
+            <Select onValueChange={(value) => setVerdictFilter(value)}>
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Select a verdict" />
       </SelectTrigger>
@@ -144,9 +125,9 @@ const History = () => {
         <SelectGroup>
           <SelectLabel>Verdicts</SelectLabel>
           <SelectItem value="default">Default</SelectItem>
-          <SelectItem value="apple">Fake</SelectItem>
-          <SelectItem value="banana">Legit</SelectItem>
-          <SelectItem value="blueberry">Uncertain</SelectItem>
+          <SelectItem value="FAKE">Fake</SelectItem>
+          <SelectItem value="LEGIT">Legit</SelectItem>
+          <SelectItem value="UNCERTAIN">Uncertain</SelectItem>
         </SelectGroup>
       </SelectContent>
     </Select>
@@ -164,22 +145,33 @@ const History = () => {
             <TableHeader>
                 <TableRow className='bg-gray-100'>
                     {headTable.map((h) => (
-                        <TableHead key={h} className={cn("text-center", h === "Claim" && "w-[200px]")}>
+                        <TableHead key={h} className={cn("text-center", h === "Claim" && "w-[300px]")}>
                             {h}
                         </TableHead>
                     ))}
                 </TableRow>
             </TableHeader>
             <TableBody className=''>
-               {filteredData.map((history) => {
-                 const verdictInfo = verdictStyle.find(v => v.verdict === history.verdict) || verdictStyle[0];
+               {filteredData.map((claim, i) => {
+                 const verdictInfo = verdictStyle.find(v => v.verdict === claim?.result?.verdict) || verdictStyle[0];
                  return (
-                 <TableRow key={history.id} className=''>
-                 <TableCell className='text-center py-6'>{history.extractedClaim}</TableCell>
-                 <TableCell className='text-center text-muted-foreground py-6'>{history.postUrl}</TableCell>
-                 <TableCell className='text-center py-6'><span className={cn('rounded-lg px-4 py-1 text-xs', verdictInfo.style)}>{verdictInfo.full_verdict}</span></TableCell>
-                 <TableCell className='text-center text-muted-foreground py-6'>Jan 15, 2024 at 10:30 AM</TableCell>
-                 <TableCell className='text-center py-6'>View</TableCell>
+                 <TableRow key={i} className=''>
+                 <TableCell className='text-center font-medium py-0 whitespace-normal  '>{truncate(claim?.text || "", 100)}</TableCell>
+                 <TableCell className='text-center text-muted-foreground py-5'>{claim?.result?.sources.length + " Verified Sources"  }</TableCell>
+                 <TableCell className='text-center py-5'><span className={cn('rounded-lg px-4 py-1 text-xs', verdictInfo.style)}>{verdictInfo.full_verdict}</span></TableCell>
+                 <TableCell className='text-center text-muted-foreground'>{formatDate(claim?.result?.createdAt || "")}</TableCell>
+                 <TableCell className='text-center py-6'>
+                   <Button 
+                     className='text-xs hover:cursor-pointer' 
+                     variant={"outline"}
+                     onClick={() => {
+                       setSelectedClaim(claim);
+                       setIsModalOpen(true);
+                     }}
+                   >
+                     View
+                   </Button>
+                 </TableCell>
                  </TableRow>
                )})}
              
@@ -189,8 +181,29 @@ const History = () => {
             </TableBody>
         </Table>
     </div>
+
+         
+
         </main>
 
+      </>
+    ) : <>
+      <p>No data found.</p>
+    </>}
+
+    {selectedClaim && (
+      <ClaimResultModal 
+        open={isModalOpen} 
+        onOpenChange={(open) => {
+          setIsModalOpen(open);
+          if (!open) {
+            setSelectedClaim(null);
+          }
+        }} 
+        claim={selectedClaim}
+      />
+    )}
+       
     </div>
   )
 }
