@@ -23,6 +23,7 @@ const History = () => {
     const [claims, setClaims] = useState<ClaimData[]>([])
     const headTable = ["Claim", "Source", "Verdict", "Date", "Action"]
     const [error, setError] = useState<string | null>(null);
+    const [verdictFilter, setVerdictFilter] = useState<string>("default")
     const [loading, setLoading] = useState(true);
     
 
@@ -62,17 +63,20 @@ const History = () => {
 
     const filteredData = useMemo(() => {
 
+      let filtered = claims;
 
-        
-
-
+      
         if (searchQuery) {
             const query = searchQuery.toLowerCase()
-            return claims.filter((claim) => claim.text.toLowerCase().includes(query))
-        } else {
-            return claims
+            filtered =  filtered.filter((claim) => claim.text.toLowerCase().includes(query))
+        } 
+
+        if (verdictFilter && verdictFilter != "default" ) {
+          filtered = filtered.filter((claim) => claim?.result?.verdict === verdictFilter)
         }
-    }, [searchQuery, claims])
+
+        return filtered
+    }, [searchQuery, claims, verdictFilter])
 
    
     if (loading) return <p>Loading...</p>;
@@ -109,7 +113,7 @@ const History = () => {
                
             </div>
             <div>
-            <Select>
+            <Select onValueChange={(value) => setVerdictFilter(value)}>
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Select a verdict" />
       </SelectTrigger>
@@ -117,9 +121,9 @@ const History = () => {
         <SelectGroup>
           <SelectLabel>Verdicts</SelectLabel>
           <SelectItem value="default">Default</SelectItem>
-          <SelectItem value="apple">Fake</SelectItem>
-          <SelectItem value="banana">Legit</SelectItem>
-          <SelectItem value="blueberry">Uncertain</SelectItem>
+          <SelectItem value="FAKE">Fake</SelectItem>
+          <SelectItem value="LEGIT">Legit</SelectItem>
+          <SelectItem value="UNCERTAIN">Uncertain</SelectItem>
         </SelectGroup>
       </SelectContent>
     </Select>
@@ -152,7 +156,7 @@ const History = () => {
                  <TableCell className='text-center text-muted-foreground py-6'>{claim?.result?.sources.length + " Verified Sources"  }</TableCell>
                  <TableCell className='text-center py-6'><span className={cn('rounded-lg px-4 py-1 text-xs', verdictInfo.style)}>{verdictInfo.full_verdict}</span></TableCell>
                  <TableCell className='text-center text-muted-foreground py-6'>{formatDate(claim?.result?.createdAt || "")}</TableCell>
-                 <TableCell className='text-center py-6'>View</TableCell>
+                 <TableCell className='text-center py-6'><Button className='text-xs hover:cursor-pointer' variant={"outline"}>View</Button></TableCell>
                  </TableRow>
                )})}
              
