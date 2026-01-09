@@ -15,7 +15,9 @@ const UseCases = () => {
         'Fact-check breaking news in real-time',
         'Ensure editorial accuracy and credibility',
       ],
-      gradient: 'from-blue-500 to-blue-700',
+      iconColor: 'text-blue-600',
+      iconBg: 'bg-gradient-to-br from-blue-50 to-blue-100',
+      cardBg: 'bg-gradient-to-br from-blue-500 to-blue-700',
     },
     {
       icon: AlertTriangle,
@@ -26,7 +28,9 @@ const UseCases = () => {
         'Verify critical emergency information',
         'Prevent panic-inducing false claims',
       ],
-      gradient: 'from-blue-400 to-blue-600',
+      iconColor: 'text-indigo-600',
+      iconBg: 'bg-gradient-to-br from-indigo-50 to-indigo-100',
+      cardBg: 'bg-white',
     },
     {
       icon: MessageSquare,
@@ -37,7 +41,9 @@ const UseCases = () => {
         'Flag potentially misleading posts',
         'Provide users with verification context',
       ],
-      gradient: 'from-blue-400 to-blue-600',
+      iconColor: 'text-purple-600',
+      iconBg: 'bg-gradient-to-br from-purple-50 to-purple-100',
+      cardBg: 'bg-white',
     },
     {
       icon: Shield,
@@ -48,7 +54,9 @@ const UseCases = () => {
         'Fact-check policy claims and proposals',
         'Maintain transparency in communications',
       ],
-      gradient: 'from-blue-500 to-blue-700',
+      iconColor: 'text-indigo-600',
+      iconBg: 'bg-gradient-to-br from-indigo-50 to-indigo-100',
+      cardBg: 'bg-white',
     },
     {
       icon: TrendingUp,
@@ -59,7 +67,9 @@ const UseCases = () => {
         'Detect false claims about products',
         'Protect reputation from misinformation',
       ],
-      gradient: 'from-blue-500 to-blue-700',
+      iconColor: 'text-emerald-600',
+      iconBg: 'bg-gradient-to-br from-emerald-50 to-emerald-100',
+      cardBg: 'bg-white',
     },
     {
       icon: Users,
@@ -70,12 +80,14 @@ const UseCases = () => {
         'Fact-check academic and research claims',
         'Promote critical thinking and media literacy',
       ],
-      gradient: 'from-blue-400 to-blue-700',
+      iconColor: 'text-amber-600',
+      iconBg: 'bg-gradient-to-br from-amber-50 to-amber-100',
+      cardBg: 'bg-white',
     },
   ]
 
   return (
-    <section className='py-20 px-4 bg-gradient-to-b from-white via-slate-50 to-blue-50'>
+    <section id="use-cases" className='py-24 px-4 bg-gradient-to-b from-white via-slate-50/50 to-indigo-50/30'>
       <div className='max-w-7xl mx-auto'>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -84,19 +96,22 @@ const UseCases = () => {
           transition={{ duration: 0.5 }}
           className='text-center mb-16'
         >
-          <div className='inline-block mb-4'>
-            <span className='text-sm font-semibold uppercase tracking-wider text-blue-500'>Use Cases</span>
-          </div>
-          <h2 className='text-4xl font-bold mb-4 text-gray-900'>Where it helps most</h2>
+          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-indigo-600 mb-3">
+            Use cases
+          </p>
+          <h2 className='text-4xl md:text-5xl font-bold mb-4 tracking-tight text-gray-900'>
+            Where it helps most
+          </h2>
           <p className='text-lg text-muted-foreground max-w-2xl mx-auto'>
             VerifiAI is not a generic fact-checking tool. It is engineered for decisions that affect real people, 
             organizations, and communities in an era of information overload.
           </p>
         </motion.div>
         
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
           {useCases.map((useCase, index) => {
             const Icon = useCase.icon
+            const isGradient = index === 0
             return (
               <motion.div
                 key={index}
@@ -104,50 +119,69 @@ const UseCases = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ y: -8 }}
+                className='transition-transform duration-300'
               >
                 <Card 
-                  className={`hover:shadow-xl transition-all duration-300 ${
-                    index === 0 ? 'bg-gradient-to-br from-blue-500 to-blue-700 text-white border-0' : ''
-                  }`}
+                  className={`hover:shadow-2xl transition-all duration-300 border-2 ${
+                    isGradient 
+                      ? `${useCase.cardBg} text-white border-transparent shadow-xl` 
+                      : 'bg-white/90 backdrop-blur-sm border-gray-200 hover:border-indigo-200'
+                  } group overflow-hidden`}
                 >
-                <CardHeader>
-                  <div className='flex items-center justify-between mb-4'>
-                    <div className={`w-12 h-12 rounded-lg ${
-                      index === 0 
-                        ? 'bg-white/20 backdrop-blur-sm' 
-                        : 'bg-gradient-to-br from-blue-50 to-blue-100'
-                    } flex items-center justify-center`}>
-                      <Icon className={`w-6 h-6 ${
-                        index === 0 ? 'text-white' : 'text-blue-600'
-                      }`} />
+                  <div className={`absolute inset-0 ${
+                    isGradient 
+                      ? 'bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100' 
+                      : 'bg-gradient-to-br from-white/60 to-transparent opacity-0 group-hover:opacity-100'
+                  } transition-opacity duration-300`} />
+                  <CardHeader className='relative z-10'>
+                    <div className='flex items-center justify-between mb-4'>
+                      <div className={`w-14 h-14 rounded-xl ${
+                        isGradient 
+                          ? 'bg-white/20 backdrop-blur-sm' 
+                          : useCase.iconBg
+                      } flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                        <Icon className={`w-7 h-7 ${
+                          isGradient ? 'text-white' : useCase.iconColor
+                        }`} />
+                      </div>
                     </div>
-                  </div>
-                  <CardTitle className={`text-xl ${
-                    index === 0 ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    {useCase.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className={`text-sm mb-4 leading-relaxed ${
-                    index === 0 ? 'text-white/90' : 'text-muted-foreground'
-                  }`}>
-                    {useCase.description}
-                  </p>
-                  <ul className={`space-y-2 ${
-                    index === 0 ? 'text-white/80' : 'text-muted-foreground'
-                  }`}>
-                    {useCase.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className='text-sm flex items-start gap-2'>
-                        <span className={`mt-1.5 ${
-                          index === 0 ? 'text-white' : 'text-blue-500'
-                        }`}>•</span>
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+                    <CardTitle className={`text-xl font-semibold ${
+                      isGradient ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      {useCase.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className='relative z-10'>
+                    <p className={`text-sm mb-4 leading-relaxed ${
+                      isGradient ? 'text-white/90' : 'text-muted-foreground'
+                    }`}>
+                      {useCase.description}
+                    </p>
+                    <ul className={`space-y-2 ${
+                      isGradient ? 'text-white/80' : 'text-muted-foreground'
+                    }`}>
+                      {useCase.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className='text-sm flex items-start gap-2'>
+                          <span className={`mt-1.5 font-bold ${
+                            isGradient 
+                              ? 'text-white' 
+                              : index === 1 
+                                ? 'text-indigo-500' 
+                                : index === 2 
+                                  ? 'text-purple-500' 
+                                  : index === 3 
+                                    ? 'text-indigo-500' 
+                                    : index === 4 
+                                      ? 'text-blue-500' 
+                                      : 'text-violet-500'
+                          }`}>•</span>
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
               </motion.div>
             )
           })}
