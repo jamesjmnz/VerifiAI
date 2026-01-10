@@ -1,0 +1,257 @@
+/* Reused Modal Component Styles */
+.verifiai-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.verifiai-modal-content {
+  width: 100%;
+  max-width: 42rem;
+  border-radius: 0.5rem;
+  background-color: white;
+  padding: 1.5rem;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.verifiai-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1.25rem;
+}
+
+.verifiai-modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.verifiai-verdict-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.verifiai-verdict-fake {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.verifiai-verdict-legit {
+  background-color: #d1fae5;
+  color: #10b981;
+}
+
+.verifiai-verdict-uncertain {
+  background-color: #fef3c7;
+  color: #f59e0b;
+}
+
+.verifiai-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding-bottom: 1.25rem;
+}
+
+.verifiai-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #1f2937;
+}
+
+.verifiai-section-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  color: #3b82f6;
+}
+
+.verifiai-analysis-box {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem 1.5rem;
+  background-color: #f9fafb;
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.verifiai-sources-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-bottom: 2.5rem;
+}
+
+.verifiai-source-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f9fafb;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-decoration: none;
+  color: inherit;
+}
+
+.verifiai-source-item:hover {
+  background-color: #f3f4f6;
+}
+
+.verifiai-source-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.verifiai-source-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
+}
+
+.verifiai-source-url {
+  color: #6b7280;
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 28rem;
+}
+
+.verifiai-source-link-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.verifiai-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #e5e7eb;
+  background-color: white;
+  color: #1f2937;
+}
+
+.verifiai-button:hover {
+  background-color: #f9fafb;
+}
+
+.verifiai-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.verifiai-close-button {
+  margin-left: auto;
+}
+
+/* Loading State */
+.verifiai-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.verifiai-loading-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.verifiai-spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid #e5e7eb;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.verifiai-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s ease-in-out infinite;
+  border-radius: 0.25rem;
+  height: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.verifiai-skeleton:last-child {
+  margin-bottom: 0;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Fact Check Button on Facebook Posts */
+.verifiai-fb-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  margin: 0.5rem 0;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.verifiai-fb-button:hover {
+  background-color: #2563eb;
+}
+
+.verifiai-fb-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.verifiai-fb-button-icon {
+  width: 1rem;
+  height: 1rem;
+}
