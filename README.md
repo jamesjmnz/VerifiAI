@@ -47,6 +47,13 @@ This directory houses the documentation for **VerifiAI**, a **hierarchical multi
 - **Verification Console** – Dashboard for submitting claims and viewing verification results
 - **Real-time Verification** – Stream verification process with detailed analysis
 - **Score Breakdown Visualization** – Display risk scores and credibility breakdowns
+- **User Authentication** – Better Auth integration with Google OAuth support
+
+### Chrome Extension
+- **One-click Fact-Checking** – Verify Facebook posts directly from your feed
+- **Automatic Text Extraction** – Extracts claim text from Facebook posts
+- **Real-time Verification** – Shows verdict and analysis in a modal overlay
+- **Configurable API URL** – Easy backend configuration via extension popup
 
 ### Backend (FastAPI + LangGraph)
 5-Node Multi-Agent Pipeline:
@@ -185,19 +192,51 @@ Final Response (with optional risk scores)
 - **Lucide React** – Icon library
 - **Prisma** – Database ORM with Neon adapter
 
+### Chrome Extension
+- **Manifest V3** – Modern Chrome extension architecture
+- **Content Scripts** – Facebook post detection and UI injection
+- **Service Worker** – Background API communication
+
 ### DevOps
-- **Docker** – Containerization (Qdrant)
-- **Docker Compose** – Local development setup
+- **Docker** – Containerization (Backend, Frontend, Qdrant)
+- **Docker Compose** – Full-stack local development setup
 
 ## Getting Started
 
 ### Prerequisites Setup
 
-1. **Start Qdrant vector database:**
-   ```bash
-   docker-compose up -d
-   ```
-   This will start Qdrant on `http://localhost:6333`
+#### Option 1: Docker Compose (Recommended for Full Stack)
+
+Start all services with Docker Compose:
+```bash
+docker-compose up -d
+```
+
+This will start:
+- Qdrant vector database on `http://localhost:6333`
+- Backend API on `http://localhost:8000`
+- Frontend on `http://localhost:3000`
+
+**Note:** Make sure to set all required environment variables in a `.env` file at the project root:
+```env
+OPENAI_API_KEY=your_openai_api_key
+TAVILY_API_KEY=your_tavily_api_key
+GOOGLE_FACT_CHECK_API_KEY=your_google_factcheck_key
+DATABASE_URL=your_database_url
+BETTER_AUTH_URL=http://localhost:3000
+BETTER_AUTH_SECRET=your_secret
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+```
+
+#### Option 2: Local Development (Manual Setup)
+
+Start only Qdrant for local development:
+```bash
+docker-compose up -d vector-db
+```
+
+Then follow the individual setup instructions below for backend and frontend.
 
 ### Backend Setup
 
@@ -245,18 +284,53 @@ Final Response (with optional risk scores)
    npm install
    ```
 
-3. **Configure environment variables:**
+3. **Set up database:**
+   ```bash
+   npx prisma migrate dev
+   npx prisma generate
+   ```
+
+4. **Configure environment variables:**
    Create a `.env.local` file:
    ```env
    NEXT_PUBLIC_API_URL=http://localhost:8000
    DATABASE_URL=your_database_url_here
+   BETTER_AUTH_URL=http://localhost:3000
+   BETTER_AUTH_SECRET=your_secret_here
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
    ```
 
-4. **Run the development server:**
+5. **Run the development server:**
    ```bash
    npm run dev
    ```
    The application will be available at `http://localhost:3000`
+
+### Chrome Extension Setup
+
+1. **Generate extension icons:**
+   - Open `chrome-extension/generate-icons.html` in your browser
+   - Click "Generate Icons" and save them to `chrome-extension/icons/`
+   - Or create 16x16, 48x48, and 128x128 PNG files manually
+
+2. **Load the extension in Chrome:**
+   - Open Chrome and go to `chrome://extensions/`
+   - Enable "Developer mode" (toggle in top right)
+   - Click "Load unpacked"
+   - Select the `chrome-extension` folder
+
+3. **Configure API URL:**
+   - Click the extension icon in Chrome toolbar
+   - Enter your backend API URL (default: `http://localhost:8000`)
+   - Click "Save Settings"
+
+4. **Start using:**
+   - Navigate to Facebook (facebook.com)
+   - Look for "Fact Check" buttons on posts
+   - Click to verify any post!
+
+For more details, see [chrome-extension/README.md](chrome-extension/README.md)
 
 ## Key Agent Files
 
@@ -386,11 +460,17 @@ ai-fake-news/
 │   │   ├── workflows/
 │   │   │   └── verification_workflow.py     # Main workflow definition
 │   │   └── main.py                          # FastAPI application entry point
-│   └── venv/                                 # Python virtual environment
+│   ├── Dockerfile                            # Backend container definition
+│   └── requirements.txt                      # Python dependencies
 ├── frontend/
 │   ├── app/                      # Next.js App Router
-│   │   ├── console/              # Verification console page
+│   │   ├── api/                  # API routes
+│   │   │   ├── auth/             # Authentication endpoints
+│   │   │   ├── claims/           # Claims management
+│   │   │   └── verify/           # Verification endpoints
+│   │   ├── console/              # Verification console
 │   │   │   ├── verify/           # Verification page
+│   │   │   ├── history/          # Verification history
 │   │   │   └── layout.tsx        # Console layout
 │   │   ├── login/                # Login page
 │   │   ├── page.tsx              # Home page
@@ -402,12 +482,24 @@ ai-fake-news/
 │   │   └── ui/                   # Reusable UI components
 │   ├── lib/
 │   │   ├── utils.ts              # Utility functions
-│   │   ├── verify.ts             # API client
-│   │   └── prisma.ts             # Prisma client
-│   └── prisma/
-│       ├── schema.prisma         # Database schema
-│       └── migrations/           # Database migrations
-├── docker-compose.yml            # Docker Compose for Qdrant
+│   │   ├── verify.ts               # API client
+│   │   ├── auth.ts                # Authentication utilities
+│   │   └── prisma.ts              # Prisma client
+│   ├── prisma/
+│   │   ├── schema.prisma         # Database schema
+│   │   └── migrations/           # Database migrations
+│   ├── Dockerfile                 # Frontend container definition
+│   └── package.json               # Node.js dependencies
+├── chrome-extension/
+│   ├── manifest.json             # Extension manifest (Manifest V3)
+│   ├── content-script.js         # Facebook post detection and UI injection
+│   ├── background.js             # Service worker for API calls
+│   ├── popup.html                # Settings page UI
+│   ├── popup.js                  # Settings page logic
+│   ├── styles.css                # Modal and button styles
+│   ├── icons/                    # Extension icons
+│   └── README.md                 # Extension documentation
+├── docker-compose.yml            # Docker Compose for full stack
 └── README.md                     # This file
 ```
 
@@ -432,9 +524,11 @@ We welcome contributions! Please follow these guidelines:
 - [x] 4-signal credibility framework
 - [x] Error handling and validation
 - [x] Vector database integration (Qdrant)
+- [x] Chrome extension integration
+- [x] User authentication (Better Auth)
+- [x] Frontend verification console
 - [ ] Enhanced report generation
 - [ ] Support for multiple languages
-- [ ] Chrome extension integration
 - [ ] Comprehensive test coverage
 - [ ] Performance optimizations
 - [ ] Advanced analytics and reporting
