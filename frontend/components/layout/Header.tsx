@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet'
 const Header = () => {
   const [session, setSession] = useState<any | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const navigations = [
     { label: "Home", href: "/" },
@@ -23,10 +24,52 @@ const Header = () => {
     { label: "FAQ", href: "#faq" },
   ]
 
+  const checkSession = async () => {
+    try {
+      const data = await authClient.getSession()
+      // Only set session if we have a valid user object
+      if (data.data?.user?.id) {
+        setSession(data.data)
+      } else {
+        // If no valid user, clear session
+        setSession(null)
+        // Also clear any stale session data
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('better-auth.session')
+        }
+      }
+    } catch (error) {
+      console.error("Error getting session:", error)
+      setSession(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    authClient.getSession().then((data) => {
-      setSession(data.data ?? null)
-    })
+    checkSession()
+    
+    // Listen for storage events (when session changes in other tabs)
+    const handleStorageChange = () => {
+      checkSession()
+    }
+    
+    // Listen for focus events (when user comes back to tab)
+    const handleFocus = () => {
+      checkSession()
+    }
+    
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('focus', handleFocus)
+    
+    // Also check session periodically (every 30 seconds) to catch changes
+    const interval = setInterval(checkSession, 30000)
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('focus', handleFocus)
+      clearInterval(interval)
+    }
   }, [])
 
   return (
@@ -95,23 +138,37 @@ const Header = () => {
             </SheetContent>
           </Sheet>
 
-          {session ? (
+          {loading ? (
+            <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
+          ) : session?.user ? (
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  {session && (
+                  {session?.user?.image ? (
                     <Image
                       height={500}
                       width={500}
                       className='h-8 w-8 rounded-full cursor-pointer hover:ring-2 ring-indigo-200 transition-all'
                       alt='profile picture'
-                      src={session?.user?.image}
+                      src={session.user.image}
                     />
+                  ) : (
+                    <div className='h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-sm font-medium'>
+                      {session.user.name?.charAt(0) || session.user.email?.charAt(0) || 'U'}
+                    </div>
                   )}
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className='w-32' align='end'>
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={logout}>Log Out</DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={async () => {
+                      await logout()
+                      // Force session refresh after logout
+                      setSession(null)
+                    }}
+                  >
+                    Log Out
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </>

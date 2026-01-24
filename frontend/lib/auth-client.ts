@@ -50,7 +50,54 @@ export const signInWithGoogle = async () => {
   }
 };
 
+/**
+ * Force clear all session data from browser
+ */
+export function clearAllSessionData() {
+  if (typeof window === 'undefined') return;
+  
+  // Clear localStorage
+  const keysToRemove: string[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (key.includes('auth') || key.includes('session') || key.includes('better-auth'))) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach(key => localStorage.removeItem(key));
+  
+  // Clear sessionStorage
+  sessionStorage.clear();
+  
+  // Clear all cookies related to auth
+  document.cookie.split(";").forEach((c) => {
+    const cookieName = c.trim().split("=")[0];
+    if (cookieName.includes('better-auth') || cookieName.includes('session') || cookieName.includes('auth')) {
+      // Clear for current path
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      // Clear for root path
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+    }
+  });
+}
+
 export async function logout() {
-  await authClient.signOut()
-  window.location.href = "/"
+  try {
+    // Clear the session on server
+    await authClient.signOut()
+    
+    // Force clear all cached session data
+    clearAllSessionData()
+    
+    // Small delay to ensure cookies are cleared
+    await new Promise(resolve => setTimeout(resolve, 100))
+    
+    // Redirect to home page with cache busting
+    window.location.href = "/?logout=true&t=" + Date.now()
+  } catch (error) {
+    console.error("Logout error:", error);
+    // Even if there's an error, clear local data and redirect
+    clearAllSessionData()
+    window.location.href = "/?logout=true&t=" + Date.now()
+  }
 }
