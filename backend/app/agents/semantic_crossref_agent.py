@@ -1,10 +1,28 @@
+import os
 from typing import Dict, List
-from sentence_transformers import SentenceTransformer
 import numpy as np
 
-_model = SentenceTransformer("BAAI/bge-m3")
-
+MODEL_NAME = "BAAI/bge-m3"
 MAX_RISK = 25
+
+# Lazy loading - model loaded only when needed
+_model = None
+
+def _load_model():
+    """Lazy load the model only when first needed."""
+    global _model
+    if _model is None:
+        # Lazy import to avoid loading sentence_transformers at module import time
+        from sentence_transformers import SentenceTransformer
+        
+        print("[INFO] Loading SentenceTransformer model (lazy load)...")
+        _model = SentenceTransformer(
+            MODEL_NAME,
+            device="cpu",  # Force CPU to save memory
+            model_kwargs={"torch_dtype": "float32"}  # Use float32 for compatibility
+        )
+        print("[INFO] SentenceTransformer model loaded successfully")
+    return _model
 
 def _extract_texts(search_results: List[Dict]) -> List[str]:
      """
@@ -53,9 +71,14 @@ def semantic_crossref_score(claim: str, search_results: List[Dict]) -> int:
     if not texts:
         return MAX_RISK
 
+    # Check if model loading is disabled
+    if os.getenv("DISABLE_SEMANTIC_MODEL", "false").lower() == "true":
+        return MAX_RISK // 2  # Return default risk if disabled
+
     try:
-        claim_emb = _model.encode([claim], normalize_embeddings=True, show_progress_bar=False)
-        text_embs = _model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
+        model = _load_model()
+        claim_emb = model.encode([claim], normalize_embeddings=True, show_progress_bar=False)
+        text_embs = model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
     except Exception as e:
         print(f"[ERROR] semantic_crossref_score encoding failed: {e}")
         return MAX_RISK

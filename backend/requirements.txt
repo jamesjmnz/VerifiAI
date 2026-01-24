@@ -15,8 +15,12 @@ langgraph>=0.2.0
 qdrant-client>=1.7.0
 
 # Machine Learning & NLP
+# Use CPU-only PyTorch to reduce memory footprint
+# Note: CPU-only index has versions 2.5.0+ only
+# Install via: pip install torch --index-url https://download.pytorch.org/whl/cpu
+# Or use regular torch (will auto-detect CPU-only on systems without CUDA)
+torch>=2.5.0
 transformers>=4.35.0
-torch>=2.1.0
 sentence-transformers>=2.2.0
 
 # HTTP Client
