@@ -33,7 +33,7 @@ COPY backend/requirements.txt .
 # Strategy: Install CPU-only PyTorch first, then other dependencies
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     # Install CPU-only PyTorch first to avoid full PyTorch being pulled
-    pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch>=2.1.0,<2.2.0 && \
+    pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu "torch>=2.1.0,<2.2.0" && \
     # Install other dependencies (torch already installed, so won't reinstall)
     pip install --no-cache-dir -r requirements.txt && \
     # Clean up pip cache and temp files
