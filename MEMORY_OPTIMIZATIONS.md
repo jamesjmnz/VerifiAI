@@ -117,14 +117,24 @@ docker run --memory="512m" --memory-swap="512m" verifiai-backend
 docker stats
 ```
 
+## Critical Fix: Lazy Imports
+
+**Problem**: Even with lazy model loading, importing `torch` and `transformers` at module level consumes 100-200MB just from the import statements.
+
+**Solution**: Moved all heavy imports (`torch`, `transformers`, `sentence_transformers`) inside the `_load_model()` functions. This means:
+- These libraries are NOT imported at application startup
+- They're only imported when models are actually needed
+- Saves ~100-200MB at startup
+
 ## Files Modified
 
-1. `backend/app/agents/fake_news_model_agent.py` - Lazy loading
-2. `backend/app/agents/semantic_crossref_agent.py` - Lazy loading
+1. `backend/app/agents/fake_news_model_agent.py` - Lazy loading + lazy imports
+2. `backend/app/agents/semantic_crossref_agent.py` - Lazy loading + lazy imports
 3. `backend/app/vectordb/qdrant_store.py` - Lazy loading
 4. `backend/app/vectordb/cache_service.py` - Updated to use lazy loading
-5. `backend/Dockerfile` - Memory optimizations
-6. `backend/requirements.txt` - CPU-only PyTorch
+5. `backend/app/main.py` - Added startup logging for memory optimization status
+6. `backend/Dockerfile` - Memory optimizations + request limits
+7. `backend/requirements.txt` - CPU-only PyTorch
 
 ## Notes
 
