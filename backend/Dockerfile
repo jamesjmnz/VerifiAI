@@ -52,7 +52,8 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Run with single worker to reduce memory usage
+# Run with single worker and memory optimizations
 # Use --workers 1 for Render's 512MB limit
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--timeout-keep-alive", "30"]
+# Limit memory with --limit-max-requests to prevent memory leaks
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--timeout-keep-alive", "30", "--limit-max-requests", "1000"]
 
