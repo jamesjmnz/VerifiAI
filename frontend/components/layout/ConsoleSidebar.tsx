@@ -44,10 +44,46 @@ const ConsoleSidebar = () => {
         },
     ]
 
+    const checkSession = async () => {
+        try {
+            const data = await authClient.getSession()
+            // Only set session if we have a valid user object
+            if (data.data?.user?.id) {
+                setSession(data.data)
+            } else {
+                // If no valid user, clear session
+                setSession(null)
+            }
+        } catch (error) {
+            console.error("Error getting session:", error)
+            setSession(null)
+        }
+    }
+
     useEffect(() => {
-        authClient.getSession().then((data) => {
-            setSession(data.data ?? null)
-        })
+        checkSession()
+        
+        // Listen for storage events (when session changes in other tabs)
+        const handleStorageChange = () => {
+            checkSession()
+        }
+        
+        // Listen for focus events (when user comes back to tab)
+        const handleFocus = () => {
+            checkSession()
+        }
+        
+        window.addEventListener('storage', handleStorageChange)
+        window.addEventListener('focus', handleFocus)
+        
+        // Also check session periodically (every 30 seconds) to catch changes
+        const interval = setInterval(checkSession, 30000)
+        
+        return () => {
+            window.removeEventListener('storage', handleStorageChange)
+            window.removeEventListener('focus', handleFocus)
+            clearInterval(interval)
+        }
     }, [])
 
   return (
@@ -128,7 +164,11 @@ const ConsoleSidebar = () => {
                 </Link>
                 {session && (
                     <button
-                        onClick={logout}
+                        onClick={async () => {
+                            await logout()
+                            // Force session refresh after logout
+                            setSession(null)
+                        }}
                         className='flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-100 transition-colors text-sm text-muted-foreground hover:text-gray-900 w-full text-left'
                     >
                         <LogOut className='w-4 h-4' />
