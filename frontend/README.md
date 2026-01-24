@@ -139,11 +139,52 @@ npx prisma migrate dev
 
 ## Deployment
 
-The application can be deployed to Vercel, Netlify, or any Node.js hosting platform. Make sure to:
+The application can be deployed to Vercel, Netlify, or any Node.js hosting platform. 
 
-1. Set all environment variables
-2. Run database migrations
-3. Build the application: `npm run build`
+### Production Environment Variables
+
+**IMPORTANT:** For production deployment, you must set these environment variables with your production URL:
+
+```env
+# Required for production
+NEXT_PUBLIC_API_URL=https://your-backend-api.com
+NEXT_PUBLIC_BETTER_AUTH_URL=https://your-domain.com
+BETTER_AUTH_URL=https://your-domain.com
+BETTER_AUTH_SECRET=your_secret_here
+DATABASE_URL=your_production_database_url
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+```
+
+### Key Points for Production:
+
+1. **`NEXT_PUBLIC_BETTER_AUTH_URL`** - Must be set to your production domain (e.g., `https://yourdomain.com`)
+   - This is used by the client-side auth client
+   - If not set, it will auto-detect from `window.location.origin`, but it's better to set it explicitly
+
+2. **`BETTER_AUTH_URL`** - Must match `NEXT_PUBLIC_BETTER_AUTH_URL`
+   - This is used by the server-side auth configuration
+
+3. **Google OAuth Configuration:**
+   - In your Google Cloud Console, make sure the **Authorized redirect URIs** includes:
+     - `https://your-domain.com/api/auth/callback/google`
+   - The redirect URI must exactly match your production domain
+
+4. **Build and Deploy:**
+   ```bash
+   npm run build
+   npm run start
+   ```
+
+### Troubleshooting Production Issues
+
+If Google login works on localhost but not in production:
+
+1. ✅ Check that `NEXT_PUBLIC_BETTER_AUTH_URL` is set to your production URL
+2. ✅ Verify Google OAuth redirect URI matches: `https://your-domain.com/api/auth/callback/google`
+3. ✅ Ensure all environment variables are set in your hosting platform
+4. ✅ Check browser console for specific error messages
+5. ✅ Verify that your production domain uses HTTPS (required for OAuth)
 
 ## Development Tips
 
