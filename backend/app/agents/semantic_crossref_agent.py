@@ -1,6 +1,5 @@
 import os
 from typing import Dict, List
-from sentence_transformers import SentenceTransformer
 import numpy as np
 
 MODEL_NAME = "BAAI/bge-m3"
@@ -13,6 +12,9 @@ def _load_model():
     """Lazy load the model only when first needed."""
     global _model
     if _model is None:
+        # Lazy import to avoid loading sentence_transformers at module import time
+        from sentence_transformers import SentenceTransformer
+        
         print("[INFO] Loading SentenceTransformer model (lazy load)...")
         _model = SentenceTransformer(
             MODEL_NAME,
