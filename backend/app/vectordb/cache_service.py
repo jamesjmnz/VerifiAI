@@ -1,11 +1,15 @@
 # app/vectordb/cache_service.py
 from datetime import datetime
 from langchain_core.documents import Document
-from app.vectordb.qdrant_store import vectorstore
+from app.vectordb.qdrant_store import get_vectorstore
 
 SIMILARITY_THRESHOLD = 0.85
 
 def search_cached_claim(claim: str):
+    vectorstore = get_vectorstore()
+    if vectorstore is None:
+        return None
+    
     results = vectorstore.similarity_search_with_score(
         query=claim,
         k=1
@@ -50,4 +54,6 @@ def save_claim_to_cache(claim: str, result: dict):
         }
     )
 
-    vectorstore.add_documents([doc])
+    vectorstore = get_vectorstore()
+    if vectorstore is not None:
+        vectorstore.add_documents([doc])
