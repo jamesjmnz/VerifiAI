@@ -1,6 +1,4 @@
 import os
-import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 MODEL_NAME = "jy46604790/Fake-News-Bert-Detect"
 MAX_RISK = 25
@@ -13,6 +11,10 @@ def _load_model():
     """Lazy load the model only when first needed."""
     global _tokenizer, _model
     if _model is None:
+        # Lazy import to avoid loading torch/transformers at module import time
+        import torch
+        from transformers import AutoTokenizer, AutoModelForSequenceClassification
+        
         print("[INFO] Loading BERT fake news model (lazy load)...")
         # Force CPU to save memory
         device = "cpu"
@@ -44,6 +46,8 @@ def fake_news_model_score(text: str) -> int:
 
      try:
         tokenizer, model = _load_model()
+        # Import torch here since it's needed for inference
+        import torch
         
         inputs = tokenizer(
             text,
