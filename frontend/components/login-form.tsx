@@ -29,11 +29,28 @@ export function LoginForm({
 
   // Check if user is already logged in
   useEffect(() => {
-    authClient.getSession().then((data) => {
-      if (data.data?.user) {
-        router.push("/console/verify")
+    const checkSession = async () => {
+      try {
+        const data = await authClient.getSession()
+        if (data.data?.user) {
+          router.push("/console/verify")
+        }
+      } catch (error) {
+        console.error("Error checking session:", error)
       }
-    })
+    }
+    
+    checkSession()
+    
+    // Also check on focus (in case session was updated in another tab)
+    const handleFocus = () => {
+      checkSession()
+    }
+    window.addEventListener('focus', handleFocus)
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+    }
   }, [router])
 
   const handleGoogleLogin = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -42,12 +59,27 @@ export function LoginForm({
     setError(null)
     
     try {
-      await signInWithGoogle()
-      // If successful, the redirect will happen automatically
+      const result = await signInWithGoogle()
+      
+      // If successful, wait a bit then check session and redirect
+      if (result && !result.error) {
+        // Wait for session to be established
+        setTimeout(async () => {
+          try {
+            const sessionData = await authClient.getSession()
+            if (sessionData.data?.user) {
+              router.push("/console/verify")
+              // Force a page reload to ensure all components get the new session
+              window.location.href = "/console/verify"
+            }
+          } catch (err) {
+            console.error("Error getting session after login:", err)
+          }
+        }, 1000)
+      }
     } catch (err: any) {
       console.error("Google login error:", err)
       setError(err?.message || "Failed to login with Google. Please check your Google OAuth configuration.")
-    } finally {
       setLoading(false)
     }
   }
