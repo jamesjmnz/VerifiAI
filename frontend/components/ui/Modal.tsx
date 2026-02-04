@@ -2,10 +2,11 @@ import React from 'react'
 import { Button } from './button'
 import Link from 'next/link'
 import { Brain, CheckCheckIcon, Link2, LucideLink, ShieldQuestionMark, Loader2, ShieldX } from 'lucide-react'
-import { VerificationResult } from '@/app/types/verify'
+import { VerificationResult, scoreBreakdown } from '@/app/types/verify'
 import { Skeleton } from './skeleton'
-import { getSourceTitle } from '@/lib/utils'
-
+import { getSourceTitle, cn } from '@/lib/utils'
+import { Newspaper } from 'lucide-react'
+import { Progress } from './progress'
 
 
 
@@ -17,6 +18,14 @@ type Props = {
   onClose: () => void
 }
 
+
+// Blue for breakdown; red stays for Risk Level only
+const SCORE_BREAKDOWN_ITEMS: { key: keyof scoreBreakdown; label: string; max: number; color: string; barColor: string }[] = [
+  { key: 'domain_trust', label: 'Source Credibility', max: 30, color: 'text-blue-700', barColor: 'bg-blue-600' },
+  { key: 'semantic_crossref', label: 'Semantic Cross-Reference', max: 25, color: 'text-blue-700', barColor: 'bg-blue-600' },
+  { key: 'google_factcheck', label: 'Google Fact Check', max: 20, color: 'text-blue-700', barColor: 'bg-blue-600' },
+  { key: 'fake_news_model', label: 'Fake News Model', max: 25, color: 'text-blue-700', barColor: 'bg-blue-600' },
+]
 
 const schemaStyle = [
   {
@@ -104,6 +113,7 @@ const Modal = ({claim, open, loading, result, onClose}: Props) => {
           </Button>
          </div>
         </div>
+       
         <div className='flex flex-col gap-2.5 pb-5'>
           <h1 className='text-base font-semibold flex items-center gap-2'><span><Brain className='text-blue-500' size={18}/></span>AI Analysis</h1>
           <div className='outline rounded-lg px-4 py-6 text-muted-foreground text-sm bg-gray-10'>
@@ -132,6 +142,44 @@ const Modal = ({claim, open, loading, result, onClose}: Props) => {
             </div>
           )}
         </div>
+
+       {result.potential_fake_score &&
+        <>
+         <div className='flex flex-col pb-10 gap-3'>
+        <h1 className='text-base flex items-center gap-2 font-semibold'><span className='text-blue-500'><Newspaper /></span>Potential Fake News Score</h1>
+        <div className='outline flex flex-col gap-5 rounded-lg px-4 py-6 text-muted-foreground text-sm bg-gray-10'>
+          <div className='flex flex-col gap-2'>
+            <div className='flex items-center justify-between'>
+              <h1 className='font-semibold'>Risk Level</h1>
+              <h1 className='text-lg font-bold text-red-500'>{result.potential_fake_score}%</h1>
+            </div>
+            <Progress  value={result.potential_fake_score} />
+          </div>
+          <div className='w-full h-2  border '>
+
+          </div>
+          <div>
+            <h1 className='font-semibold pb-5'>Score Breakdown</h1>
+            <div className='flex flex-col gap-5'>
+              {SCORE_BREAKDOWN_ITEMS.map(({ key, label, max, color, barColor }) => {
+                const value = result.score_breakdown?.[key] ?? 0
+                const pct = max > 0 ? (value / max) * 100 : 0
+                return (
+                  <div key={key} className='flex flex-col gap-2'>
+                    <div className='flex items-center justify-between'>
+                      <h1>{label}</h1>
+                      <h1 className={cn('font-bold', color)}>{value} / {max}</h1>
+                    </div>
+                    <Progress value={pct} indicatorClassName={barColor} />
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+          </div>
+        </div>
+         </>
+       }
         <div className='justify-end flex w-full'>
         <Button onClick={onClose}  variant={'outline'}>
             Close
